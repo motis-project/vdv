@@ -1,0 +1,8 @@
+/*build*
+/.idea
+/deps
+*.zip
+*.bin
+*.pbf
+/osr
+/delfi
