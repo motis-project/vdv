@@ -58,19 +58,21 @@ endif ()
 file(GLOB_RECURSE vdv-files src/*.cc)
 add_library(vdv ${vdv-files})
 target_include_directories(vdv PUBLIC include)
+target_link_libraries(vdv PUBLIC pugixml utl http-client date)
 target_compile_features(vdv PUBLIC cxx_std_23)
+target_compile_options(vdv PRIVATE ${vdv-compile-options})
 
 
 # --- CLIENT ---
 add_executable(vdv-client exe/client.cc)
 target_compile_features(vdv-client PUBLIC cxx_std_23)
-target_link_libraries(vdv-client vdv web-server)
+target_link_libraries(vdv-client vdv boost-program_options web-server http-client)
 
 
 # --- SERVER ---
 add_executable(vdv-server exe/server.cc)
 target_compile_features(vdv-server PUBLIC cxx_std_23)
-target_link_libraries(vdv-server vdv web-server)
+target_link_libraries(vdv-server vdv boost-program_options web-server http-client)
 
 
 # --- TEST ---
@@ -82,5 +84,5 @@ configure_file(
 )
 file(GLOB_RECURSE vdv-test-files test/*.cc)
 add_executable(vdv-test ${vdv-test-files})
-target_link_libraries(vdv-test vdv gtest ianatzdb-res vdv-generated)
+target_link_libraries(vdv-test vdv gtest ianatzdb-res vdv-generated utl)
 target_compile_options(vdv-test PRIVATE ${vdv-compile-options})

@@ -1,6 +1,5 @@
 #include <filesystem>
 
-#include "google/protobuf/arena.h"
 #include "gtest/gtest.h"
 
 #include "utl/progress_tracker.h"
@@ -22,8 +21,6 @@ int main(int argc, char** argv) {
 
   ::testing::InitGoogleTest(&argc, argv);
   auto test_result = RUN_ALL_TESTS();
-
-  google::protobuf::ShutdownProtobufLibrary();
 
   return test_result;
 }
