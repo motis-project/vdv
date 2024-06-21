@@ -31,6 +31,19 @@ TEST(xml_out, abo_anfrage) {
             result_str(abo_anfrage_xml_str("motis", t, 1, 30s, 1440min)));
 }
 
+constexpr auto const abo_loeschen_expected = R"(
+<?xml version="1.0" encoding="iso-8859-1"?>
+<AboAnfrage Sender="motis" Zst="2024-06-21T13:37:23">
+  <AboLoeschen>42</AboLoeschen>
+  <AboLoeschen>23</AboLoeschen>
+</AboAnfrage>
+)";
+
+TEST(xml_out, abo_loeschen) {
+  EXPECT_EQ(abo_loeschen_expected,
+            result_str(abo_loeschen_anfrage_xml_str("motis", t, {42, 23})));
+}
+
 constexpr auto const abo_antwort_expected = R"(
 <?xml version="1.0" encoding="iso-8859-1"?>
 <AboAntwort>
