@@ -8,6 +8,12 @@
 using namespace vdv::client;
 using namespace std::literals::chrono_literals;
 
+std::string result_str(std::string const& str) {
+  std::stringstream ss;
+  ss << "\n" << str;
+  return ss.str();
+}
+
 constexpr auto const abo_anfrage_expected = R"(
 <?xml version="1.0" encoding="iso-8859-1"?>
 <AboAnfrage xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" Sender="motis" Zst="2024-06-21T13:37:23">
@@ -24,6 +30,5 @@ TEST(vdv_client, abo_anfrage) {
   auto const req_abo_anfrage = make_abo_anfrage(
       net::http::client::url{"http://0.0.0.0:80"}, "motis", t, 1, 30s, 1440min);
 
-  std::cout << req_abo_anfrage.body << "\n";
-  EXPECT_EQ(abo_anfrage_expected, req_abo_anfrage.body);
+  EXPECT_EQ(abo_anfrage_expected, result_str(req_abo_anfrage.body));
 }
