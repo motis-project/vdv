@@ -27,7 +27,7 @@ int main() {
        "the ip of this vdv client") //
       ("client_port", bpo::value(&client_port)->default_value(client_port),
        "the listening port of this vdv client") //
-      ("server_ip", bpo::value(&fasta_path)->default_value(server_ip),
+      ("server_ip", bpo::value(&server_ip)->default_value(server_ip),
        "the ip of the vdv server to talk to") //
       ("server_port", bpo::value(&server_port)->default_value(server_port),
        "the port of the vdv to talk to");

@@ -1,12 +1,13 @@
 #pragma once
 
-#include "date/date.h"
+#include "vdv/types.h"
 
 namespace vdv {
 
-std::chrono::time_point<std::chrono::system_clock> timestamp_current();
+timestamp_t timestamp_now();
 
-std::chrono::time_point<std::chrono::system_clock> timestamp_future(
-    std::chrono::hours);
+std::string timestamp_to_string(timestamp_t);
+
+timestamp_t timestamp_from_string(std::string const&);
 
 }  // namespace vdv
