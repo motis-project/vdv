@@ -13,12 +13,18 @@ pugi::xml_document make_xml_doc() {
   return doc;
 }
 
+void add_sender_zst_attr(pugi::xml_node& node,
+                         std::string const& sender,
+                         timestamp_t const t) {
+  node.append_attribute("Sender") = sender.c_str();
+  node.append_attribute("Zst") = timestamp_to_string(t).c_str();
+}
+
 pugi::xml_node add_abo_anfrage_node(pugi::xml_node& node,
                                     std::string const& sender,
                                     timestamp_t const t) {
   auto abo_anfrage_node = node.append_child("AboAnfrage");
-  abo_anfrage_node.append_attribute("Sender") = sender.c_str();
-  abo_anfrage_node.append_attribute("Zst") = timestamp_to_string(t).c_str();
+  add_sender_zst_attr(abo_anfrage_node, sender, t);
   return abo_anfrage_node;
 }
 
@@ -118,6 +124,33 @@ std::string daten_abrufen_anfrage_xml_str(std::string const& sender,
         daten_abrufen_anfrage_node.append_child("DatensatzAlle");
     datensatz_alle_node.append_child(pugi::node_pcdata).set_value("true");
   }
+  return xml_to_str(doc);
+}
+
+std::string status_anfrage_xml_str(std::string const& sender,
+                                   timestamp_t const t) {
+  auto doc = make_xml_doc();
+  auto status_anfrage_node = doc.append_child("StatusAnfrage");
+  add_sender_zst_attr(status_anfrage_node, sender, t);
+  return xml_to_str(doc);
+}
+
+std::string status_antwort_xml_str(timestamp_t const t,
+                                   bool const success,
+                                   bool const data_rdy,
+                                   timestamp_t const start) {
+  auto doc = make_xml_doc();
+  auto status_antwort_node = doc.append_child("StatusAntwort");
+  auto status_node = status_antwort_node.append_child("Status");
+  status_node.append_attribute("Zst") = timestamp_to_string(t).c_str();
+  status_node.append_attribute("Ergebnis") = success ? "ok" : "notok";
+  auto daten_bereit_node = status_antwort_node.append_child("DatenBereit");
+  daten_bereit_node.append_child(pugi::node_pcdata)
+      .set_value(data_rdy ? "true" : "false");
+  auto start_dienst_zst_node =
+      status_antwort_node.append_child("StartDienstZst");
+  start_dienst_zst_node.append_child(pugi::node_pcdata)
+      .set_value(timestamp_to_string(start).c_str());
   return xml_to_str(doc);
 }
 

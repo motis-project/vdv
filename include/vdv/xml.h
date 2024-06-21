@@ -39,4 +39,11 @@ std::string daten_abrufen_anfrage_xml_str(std::string const& sender,
 
 // daten_abrufen_antwort_xml_str
 
+std::string status_anfrage_xml_str(std::string const& sender, timestamp_t);
+
+std::string status_antwort_xml_str(timestamp_t,
+                                   bool success,
+                                   bool data_rdy,
+                                   timestamp_t start);
+
 }  // namespace vdv

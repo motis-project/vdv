@@ -98,3 +98,27 @@ TEST(xml_out, daten_abrufen_anfrage) {
   EXPECT_EQ(daten_abrufen_anfrage_expected,
             result_str(daten_abrufen_anfrage_xml_str("motis", t, false)));
 }
+
+constexpr auto const status_anfrage_expected = R"(
+<?xml version="1.0" encoding="iso-8859-1"?>
+<StatusAnfrage Sender="motis" Zst="2024-06-21T13:37:23" />
+)";
+
+TEST(xml_out, status_anfrage) {
+  EXPECT_EQ(status_anfrage_expected,
+            result_str(status_anfrage_xml_str("motis", t)));
+}
+
+constexpr auto const status_antwort_expected = R"(
+<?xml version="1.0" encoding="iso-8859-1"?>
+<StatusAntwort>
+  <Status Zst="2024-06-21T13:37:23" Ergebnis="ok" />
+  <DatenBereit>true</DatenBereit>
+  <StartDienstZst>2024-06-21T13:37:23</StartDienstZst>
+</StatusAntwort>
+)";
+
+TEST(xml_out, status_antwort) {
+  EXPECT_EQ(status_antwort_expected,
+            result_str(status_antwort_xml_str(t, true, true, t)));
+}
