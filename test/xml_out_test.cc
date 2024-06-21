@@ -77,14 +77,24 @@ TEST(xml_out, daten_bereit_antwort) {
             result_str(daten_bereit_antwort_xml_str(t, true, 0)));
 }
 
-constexpr auto const daten_abrufen_anfrage_expected = R"(
+constexpr auto const daten_abrufen_anfrage_all_datasets_expected = R"(
 <?xml version="1.0" encoding="iso-8859-1"?>
 <DatenAbrufenAnfrage Sender="motis" Zst="2024-06-21T13:37:23">
   <DatensatzAlle>true</DatensatzAlle>
 </DatenAbrufenAnfrage>
 )";
 
+TEST(xml_out, daten_abrufen_anfrage_all_datasets) {
+  EXPECT_EQ(daten_abrufen_anfrage_all_datasets_expected,
+            result_str(daten_abrufen_anfrage_xml_str("motis", t, true)));
+}
+
+constexpr auto const daten_abrufen_anfrage_expected = R"(
+<?xml version="1.0" encoding="iso-8859-1"?>
+<DatenAbrufenAnfrage Sender="motis" Zst="2024-06-21T13:37:23" />
+)";
+
 TEST(xml_out, daten_abrufen_anfrage) {
   EXPECT_EQ(daten_abrufen_anfrage_expected,
-            result_str(daten_abrufen_anfrage_xml_str("motis", t, true)));
+            result_str(daten_abrufen_anfrage_xml_str("motis", t, false)));
 }

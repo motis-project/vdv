@@ -113,10 +113,11 @@ std::string daten_abrufen_anfrage_xml_str(std::string const& sender,
   daten_abrufen_anfrage_node.append_attribute("Sender") = sender.c_str();
   daten_abrufen_anfrage_node.append_attribute("Zst") =
       timestamp_to_string(t).c_str();
-  auto datensatz_alle_node =
-      daten_abrufen_anfrage_node.append_child("DatensatzAlle");
-  datensatz_alle_node.append_child(pugi::node_pcdata)
-      .set_value(all_datasets ? "true" : "false");
+  if (all_datasets) {
+    auto datensatz_alle_node =
+        daten_abrufen_anfrage_node.append_child("DatensatzAlle");
+    datensatz_alle_node.append_child(pugi::node_pcdata).set_value("true");
+  }
   return xml_to_str(doc);
 }
 
