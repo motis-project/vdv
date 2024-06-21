@@ -17,4 +17,8 @@ std::string abo_anfrage_xml_str(std::string const& sender,
                                 std::chrono::seconds hysteresis,
                                 std::chrono::minutes look_ahead);
 
+std::string abo_antwort_xml_str(timestamp_t,
+                                bool success,
+                                std::uint32_t error_code);
+
 }  // namespace vdv

@@ -12,12 +12,16 @@ pugi::xml_document make_xml_doc() {
   return doc;
 }
 
-void add_root_attr(pugi::xml_node& node,
-                   std::string const& sender,
-                   timestamp_t const t_now) {
+void add_root_attr(pugi::xml_node& node) {
   node.append_attribute("xmlns:xsd") = "http://www.w3.org/2001/XMLSchema";
   node.append_attribute("xmlns:xsi") =
       "http://www.w3.org/2001/XMLSchema-instance";
+}
+
+void add_root_attr(pugi::xml_node& node,
+                   std::string const& sender,
+                   timestamp_t const t_now) {
+  add_root_attr(node);
   node.append_attribute("Sender") = sender.c_str();
   node.append_attribute("Zst") = timestamp_to_string(t_now).c_str();
 }
@@ -46,6 +50,20 @@ std::string abo_anfrage_xml_str(std::string const& sender,
   auto vorschauzeit_node = abo_aus_node.append_child("Vorschauzeit");
   vorschauzeit_node.append_child(pugi::node_pcdata)
       .set_value(std::to_string(look_ahead.count()).c_str());
+  return xml_to_str(doc);
+}
+
+std::string abo_antwort_xml_str(timestamp_t const t,
+                                bool const success,
+                                std::uint32_t const error_code) {
+  auto doc = make_xml_doc();
+  auto abo_antwort_node = doc.append_child("AboAntwort");
+  add_root_attr(abo_antwort_node);
+  auto bestaetigung_node = abo_antwort_node.append_child("Bestaetigung");
+  bestaetigung_node.append_attribute("Zst") = timestamp_to_string(t).c_str();
+  bestaetigung_node.append_attribute("Ergebnis") = success ? "ok" : "notok";
+  bestaetigung_node.append_attribute("Fehlernummer") =
+      std::to_string(error_code).c_str();
   return xml_to_str(doc);
 }
 

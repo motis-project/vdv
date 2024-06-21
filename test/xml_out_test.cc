@@ -14,6 +14,8 @@ std::string result_str(std::string const& str) {
   return ss.str();
 }
 
+auto const t = vdv::timestamp_from_string("2024-06-21T13:37:23");
+
 constexpr auto const abo_anfrage_expected = R"(
 <?xml version="1.0" encoding="iso-8859-1"?>
 <AboAnfrage xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" Sender="motis" Zst="2024-06-21T13:37:23">
@@ -24,11 +26,18 @@ constexpr auto const abo_anfrage_expected = R"(
 </AboAnfrage>
 )";
 
-TEST(vdv_client, abo_anfrage) {
-  auto const t = vdv::timestamp_from_string("2024-06-21T13:37:23");
+TEST(xml_out, abo_anfrage) {
+  EXPECT_EQ(abo_anfrage_expected,
+            result_str(abo_anfrage_xml_str("motis", t, 1, 30s, 1440min)));
+}
 
-  auto const abo_anfrage_actual =
-      abo_anfrage_xml_str("motis", t, 1, 30s, 1440min);
+constexpr auto const abo_antwort_expected = R"(
+<?xml version="1.0" encoding="iso-8859-1"?>
+<AboAntwort xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Bestaetigung Zst="2024-06-21T13:37:23" Ergebnis="ok" Fehlernummer="0" />
+</AboAntwort>
+)";
 
-  EXPECT_EQ(abo_anfrage_expected, result_str(abo_anfrage_actual));
+TEST(xml_out, abo_antwort) {
+  EXPECT_EQ(abo_antwort_expected, result_str(abo_antwort_xml_str(t, true, 0)));
 }
