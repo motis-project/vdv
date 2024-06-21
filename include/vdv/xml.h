@@ -5,12 +5,16 @@
 
 namespace vdv {
 
-constexpr auto const kEncoding = "encoding_latin-1";
-
-pugi::xml_document make_xml_doc();
-
-void add_root_attr(pugi::xml_node&, std::string const& sender, timestamp_t);
-
-std::string xml_to_str(pugi::xml_document const&);
+/*
+ * abo_id: id of the subscription, chosen and managed by the client
+ * hysteresis: threshold in seconds at which deviations from the static
+ *              timetable shall be transmitted
+ * look_ahead: maximum look ahead time in minutes
+ */
+std::string abo_anfrage_xml_str(std::string const& sender,
+                                timestamp_t,
+                                std::uint32_t abo_id,
+                                std::chrono::seconds hysteresis,
+                                std::chrono::minutes look_ahead);
 
 }  // namespace vdv

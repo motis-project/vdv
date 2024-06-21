@@ -1,7 +1,7 @@
 #include "gtest/gtest.h"
 
-#include "vdv/requests.h"
 #include "vdv/timestamp.h"
+#include "vdv/xml.h"
 
 #include <chrono>
 
@@ -25,10 +25,10 @@ constexpr auto const abo_anfrage_expected = R"(
 )";
 
 TEST(vdv_client, abo_anfrage) {
-  auto const t = vdv::timestamp_from_string("2024-06-21T13:37:23.00000");
+  auto const t = vdv::timestamp_from_string("2024-06-21T13:37:23");
 
-  auto const req_abo_anfrage = make_abo_anfrage(
-      net::http::client::url{"http://0.0.0.0:80"}, "motis", t, 1, 30s, 1440min);
+  auto const abo_anfrage_actual =
+      abo_anfrage_xml_str("motis", t, 1, 30s, 1440min);
 
-  EXPECT_EQ(abo_anfrage_expected, result_str(req_abo_anfrage.body));
+  EXPECT_EQ(abo_anfrage_expected, result_str(abo_anfrage_actual));
 }
