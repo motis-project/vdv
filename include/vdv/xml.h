@@ -21,4 +21,15 @@ std::string abo_antwort_xml_str(timestamp_t,
                                 bool success,
                                 std::uint32_t error_code);
 
+std::string daten_bereit_anfrage_xml_str(std::string const& sender,
+                                         timestamp_t);
+
+std::string daten_bereit_antwort_xml_str(timestamp_t,
+                                         bool success,
+                                         std::uint32_t error_code);
+
+std::string daten_abrufen_anfrage_xml_str(std::string const& sender,
+                                          timestamp_t,
+                                          bool all_datasets);
+
 }  // namespace vdv
