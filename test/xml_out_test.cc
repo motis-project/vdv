@@ -122,3 +122,13 @@ TEST(xml_out, status_antwort) {
   EXPECT_EQ(status_antwort_expected,
             result_str(status_antwort_xml_str(t, true, true, t)));
 }
+
+constexpr auto const client_status_anfrage_expected = R"(
+<?xml version="1.0" encoding="iso-8859-1"?>
+<ClientStatusAnfrage Sender="motis" Zst="2024-06-21T13:37:23" MitAbos="true" />
+)";
+
+TEST(xml_out, client_status_anfrage) {
+  EXPECT_EQ(client_status_anfrage_expected,
+            result_str(client_status_anfrage_xml_str("motis", t, true)));
+}

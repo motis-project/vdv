@@ -20,6 +20,12 @@ void add_sender_zst_attr(pugi::xml_node& node,
   node.append_attribute("Zst") = timestamp_to_string(t).c_str();
 }
 
+void add_start_dienst_zst_node(pugi::xml_node& node, timestamp_t const start) {
+  auto start_dienst_zst_node = node.append_child("StartDienstZst");
+  start_dienst_zst_node.append_child(pugi::node_pcdata)
+      .set_value(timestamp_to_string(start).c_str());
+}
+
 pugi::xml_node add_abo_anfrage_node(pugi::xml_node& node,
                                     std::string const& sender,
                                     timestamp_t const t) {
@@ -147,10 +153,19 @@ std::string status_antwort_xml_str(timestamp_t const t,
   auto daten_bereit_node = status_antwort_node.append_child("DatenBereit");
   daten_bereit_node.append_child(pugi::node_pcdata)
       .set_value(data_rdy ? "true" : "false");
-  auto start_dienst_zst_node =
-      status_antwort_node.append_child("StartDienstZst");
-  start_dienst_zst_node.append_child(pugi::node_pcdata)
-      .set_value(timestamp_to_string(start).c_str());
+  add_start_dienst_zst_node(status_antwort_node, start);
+  return xml_to_str(doc);
+}
+
+std::string client_status_anfrage_xml_str(std::string const& sender,
+                                          timestamp_t const t,
+                                          bool const req_active_abos) {
+  auto doc = make_xml_doc();
+  auto client_status_anfrage_node = doc.append_child("ClientStatusAnfrage");
+  add_sender_zst_attr(client_status_anfrage_node, sender, t);
+  if (req_active_abos) {
+    client_status_anfrage_node.append_attribute("MitAbos") = "true";
+  }
   return xml_to_str(doc);
 }
 

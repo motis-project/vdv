@@ -46,4 +46,8 @@ std::string status_antwort_xml_str(timestamp_t,
                                    bool data_rdy,
                                    timestamp_t start);
 
+std::string client_status_anfrage_xml_str(std::string const& sender,
+                                          timestamp_t,
+                                          bool req_active_abos);
+
 }  // namespace vdv
