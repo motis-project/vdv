@@ -4,7 +4,7 @@
 #include "pugixml.hpp"
 #include "vdv/types.h"
 
-namespace vdv::client {
+namespace vdv {
 
 /*
  * abo_id: id of the subscription, chosen and managed by the client
@@ -19,4 +19,4 @@ net::http::client::request make_abo_anfrage(net::http::client::url const&,
                                             std::chrono::seconds hysteresis,
                                             std::chrono::minutes look_ahead);
 
-}  // namespace vdv::client
+}  // namespace vdv

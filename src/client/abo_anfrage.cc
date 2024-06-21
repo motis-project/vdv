@@ -1,11 +1,11 @@
-#include "vdv/client/requests.h"
+#include "vdv/requests.h"
 
 #include "vdv/timestamp.h"
 #include "vdv/xml.h"
 
 #include <sstream>
 
-namespace vdv::client {
+namespace vdv {
 
 using namespace pugi;
 using namespace net::http::client;
@@ -42,4 +42,4 @@ request make_abo_anfrage(net::http::client::url const& addr,
                  xml_to_str(xml)};
 }
 
-}  // namespace vdv::client
+}  // namespace vdv

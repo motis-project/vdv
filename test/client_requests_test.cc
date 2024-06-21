@@ -1,11 +1,11 @@
 #include "gtest/gtest.h"
 
-#include "vdv/client/requests.h"
+#include "vdv/requests.h"
 #include "vdv/timestamp.h"
 
 #include <chrono>
 
-using namespace vdv::client;
+using namespace vdv;
 using namespace std::literals::chrono_literals;
 
 std::string result_str(std::string const& str) {

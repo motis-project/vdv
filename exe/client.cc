@@ -1,9 +1,8 @@
-#include "vdv/client/requests.h"
+#include "vdv/requests.h"
 #include "vdv/timestamp.h"
 
 #include "net/http/client/http_client.h"
 #include "net/run.h"
-#include "net/tcp.h"
 
 #include "boost/program_options.hpp"
 
@@ -11,7 +10,6 @@ namespace asio = boost::asio;
 using namespace std::string_literals;
 using namespace std::literals::chrono_literals;
 using namespace vdv;
-using namespace vdv::client;
 
 int main(int ac, char** av) {
   using namespace net::http::client;
