@@ -1,4 +1,4 @@
-#include "vdv/xml.h"
+#include "vdv/xml_out.h"
 #include <vector>
 #include "vdv/timestamp.h"
 #include "vdv/types.h"
@@ -59,7 +59,7 @@ std::string xml_to_str(pugi::xml_document const& doc) {
 
 std::string abo_anfrage_xml_str(std::string const& sender,
                                 timestamp_t const t,
-                                std::uint32_t const abo_id,
+                                std::uint64_t const abo_id,
                                 std::chrono::seconds const hysteresis,
                                 std::chrono::minutes const look_ahead) {
   auto doc = make_xml_doc();

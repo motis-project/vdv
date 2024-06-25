@@ -13,18 +13,17 @@ namespace vdv {
  */
 std::string abo_anfrage_xml_str(std::string const& sender,
                                 timestamp_t,
-                                std::uint32_t abo_id,
+                                std::uint64_t abo_id,
                                 std::chrono::seconds hysteresis,
                                 std::chrono::minutes look_ahead);
 
-std::string abo_loeschen_anfrage_xml_str(
-    std::string const& sender,
-    timestamp_t,
-    std::vector<std::uint32_t> const& abo_ids);
+std::string abo_loeschen_anfrage_xml_str(std::string const& sender,
+                                         timestamp_t,
+                                         std::vector<abo_id_t> const& abo_ids);
 
 std::string abo_antwort_xml_str(timestamp_t,
                                 bool success,
-                                std::uint32_t error_code);
+                                error_code_t error_code);
 
 std::string daten_bereit_anfrage_xml_str(std::string const& sender,
                                          timestamp_t);
