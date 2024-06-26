@@ -21,11 +21,6 @@ TEST(xml_out, abo_anfrage) {
             result_str(abo_anfrage_xml_str("motis", t, 1, 30s, 1440min)));
 }
 
-TEST(xml_out, abo_loeschen) {
-  EXPECT_EQ(abo_loeschen_str,
-            result_str(abo_loeschen_anfrage_xml_str("motis", t, {42, 23})));
-}
-
 TEST(xml_out, abo_antwort) {
   EXPECT_EQ(abo_antwort_str, result_str(abo_antwort_xml_str(t, true, 0)));
 }
@@ -66,5 +61,5 @@ TEST(xml_out, client_status_anfrage) {
 
 TEST(xml_out, client_status_antwort) {
   EXPECT_EQ(client_status_antwort_str,
-            result_str(client_status_antwort_xml_str(t, true, start)));
+            result_str(client_status_antwort_xml_str(t, true, t)));
 }

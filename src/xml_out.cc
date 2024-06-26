@@ -85,18 +85,6 @@ std::string abo_anfrage_xml_str(std::string const& sender,
   return xml_to_str(doc);
 }
 
-std::string abo_loeschen_anfrage_xml_str(
-    std::string const& sender,
-    timestamp_t const t,
-    std::vector<std::uint32_t> const& abo_ids) {
-  auto doc = make_xml_doc();
-  auto abo_anfrage_node = add_abo_anfrage_node(doc, sender, t);
-  for (auto abo_id : abo_ids) {
-    add_abo_loeschen_node(abo_anfrage_node, abo_id);
-  }
-  return xml_to_str(doc);
-}
-
 std::string abo_antwort_xml_str(timestamp_t const t,
                                 bool const success,
                                 std::uint32_t const error_code) {
