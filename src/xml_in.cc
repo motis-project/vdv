@@ -236,6 +236,68 @@ std::optional<status_antwort_msg> parse_status_antwort(
   return status_antwort;
 }
 
+std::optional<client_status_anfrage_msg> parse_client_status_anfrage(
+    pugi::xml_document const& doc) {
+  auto client_status_anfrage = client_status_anfrage_msg{};
+
+  auto sender_xpath = doc.select_node("ClientStatusAnfrage/@Sender");
+  if (!sender_xpath) {
+    std::cout << "Warning: could not find Sender attribute\n";
+    return std::nullopt;
+  }
+  client_status_anfrage.sender_ = sender_xpath.attribute().value();
+
+  auto timestamp_xpath = doc.select_node("ClientStatusAnfrage/@Zst");
+  if (!timestamp_xpath) {
+    std::cout << "Warning: could not find Zst attribute\n";
+    return std::nullopt;
+  }
+  client_status_anfrage.t_ =
+      timestamp_from_string(timestamp_xpath.attribute().value());
+
+  auto req_active_abos_xpath = doc.select_node("ClientStatusAnfrage/@MitAbos");
+  if (req_active_abos_xpath) {
+    std::istringstream{req_active_abos_xpath.attribute().value()} >>
+        std::boolalpha >> client_status_anfrage.req_active_abos_;
+  }
+
+  return client_status_anfrage;
+}
+
+std::optional<client_status_antwort_msg> parse_client_status_antwort(
+    pugi::xml_document const& doc) {
+  auto client_status_antwort = client_status_antwort_msg{};
+
+  auto const timestamp_xpath =
+      doc.select_node("ClientStatusAntwort/Status/@Zst");
+  if (!timestamp_xpath) {
+    std::cout << "Warning: could not find Zst attribute\n";
+    return std::nullopt;
+  }
+  client_status_antwort.t_ =
+      timestamp_from_string(timestamp_xpath.attribute().value());
+
+  auto const success_xpath =
+      doc.select_node("ClientStatusAntwort/Status/@Ergebnis");
+  if (!success_xpath) {
+    std::cout << "Warning: could not find Ergebnis attribute\n";
+    return std::nullopt;
+  }
+  client_status_antwort.success_ =
+      std::string_view{success_xpath.attribute().value()} == "ok";
+
+  auto const start_time_xpath =
+      doc.select_node("ClientStatusAntwort/StartDienstZst");
+  if (!start_time_xpath) {
+    std::cout << "Warning: could not find StartDienstZst\n";
+    return std::nullopt;
+  }
+  client_status_antwort.start_ =
+      timestamp_from_string(start_time_xpath.node().child_value());
+
+  return client_status_antwort;
+}
+
 static auto parse_fun_map = std::unordered_map<
     std::string,
     std::function<std::optional<vdv_msg>(pugi::xml_document const&)>>{
@@ -245,7 +307,9 @@ static auto parse_fun_map = std::unordered_map<
     {"DatenBereitAntwort", parse_daten_bereit_antwort},
     {"DatenAbrufenAnfrage", parse_daten_abrufen_anfrage},
     {"StatusAnfrage", parse_status_anfrage},
-    {"StatusAntwort", parse_status_antwort}};
+    {"StatusAntwort", parse_status_antwort},
+    {"ClientStatusAnfrage", parse_client_status_anfrage},
+    {"ClientStatusAntwort", parse_client_status_antwort}};
 
 std::optional<vdv_msg> parse(std::string const& str) {
   auto doc = pugi::xml_document{};

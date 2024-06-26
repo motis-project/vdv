@@ -71,7 +71,7 @@ struct client_status_anfrage_msg {
   net::http::client::url from_;
   timestamp_t t_;
   std::string sender_;
-  bool req_active_abos_;
+  bool req_active_abos_{false};
 };
 
 struct client_status_antwort_msg {

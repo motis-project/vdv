@@ -97,11 +97,13 @@ TEST(xml_in, status_antwort) {
   EXPECT_EQ(status_antwort_actual.data_rdy_, true);
   EXPECT_EQ(status_antwort_actual.start_, t);
 }
-/*
+
 TEST(xml_in, client_status_anfrage) {
   auto const msg = parse(client_status_anfrage_str);
-  ASSERT_TRUE(holds_alternative<client_status_anfrage_msg>(msg));
-  auto const client_status_anfrage_actual = get<client_status_anfrage_msg>(msg);
+  ASSERT_TRUE(msg.has_value());
+  ASSERT_TRUE(holds_alternative<client_status_anfrage_msg>(msg.value()));
+  auto const client_status_anfrage_actual =
+      get<client_status_anfrage_msg>(msg.value());
   EXPECT_EQ(client_status_anfrage_actual.sender_, "motis");
   EXPECT_EQ(client_status_anfrage_actual.t_, t);
   EXPECT_EQ(client_status_anfrage_actual.req_active_abos_, true);
@@ -109,11 +111,12 @@ TEST(xml_in, client_status_anfrage) {
 
 TEST(xml_in, client_status_antwort) {
   auto const msg = parse(client_status_antwort_str);
-  ASSERT_TRUE(holds_alternative<client_status_antwort_msg>(msg));
-  auto const client_status_antwort_actual = get<client_status_antwort_msg>(msg);
+  ASSERT_TRUE(msg.has_value());
+  ASSERT_TRUE(holds_alternative<client_status_antwort_msg>(msg.value()));
+  auto const client_status_antwort_actual =
+      get<client_status_antwort_msg>(msg.value());
   EXPECT_EQ(client_status_antwort_actual.t_, t);
   EXPECT_EQ(client_status_antwort_actual.success_, true);
   EXPECT_EQ(client_status_antwort_actual.start_, t);
   EXPECT_TRUE(client_status_antwort_actual.subscriptions_.empty());
 }
-*/
