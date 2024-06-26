@@ -5,170 +5,99 @@
 #include "vdv/subscription.h"
 #include "vdv/types.h"
 
+#include <variant>
 #include <vector>
 
 namespace vdv {
 
-enum msg_type {
-  kAboAnfrage,
-  kAboLoeschen,
-  kAboAntwort,
-  kDatenBereitAnfrage,
-  kDatenBereitAntwort,
-  kDatenAbrufenAnfrage,
-  kDatenAbrufenAntwort,
-  kStatusAnfrage,
-  kStatusAntwort,
-  kClientStatusAnfrage,
-  kClientStatusAntwort
-};
-
-struct msg {
-  msg(net::http::client::url from, timestamp_t);
-  virtual ~msg() = 0;
-  constexpr virtual msg_type get_msg_type() const = 0;
-
+struct abo_anfrage_msg {
   net::http::client::url from_;
   timestamp_t t_;
-};
-
-struct abo_anfrage_msg : public msg {
-  abo_anfrage_msg(net::http::client::url from,
-                  timestamp_t,
-                  std::string const& sender,
-                  abo_id_t const,
-                  std::chrono::seconds const hysteresis,
-                  std::chrono::minutes const look_ahead);
-
-  constexpr msg_type get_msg_type() const override {
-    return msg_type::kAboAnfrage;
-  }
-
-  std::string const& sender_;
+  std::string sender_;
   abo_id_t abo_id_;
   std::chrono::seconds hysteresis_;
   std::chrono::minutes look_ahead_;
 };
 
-struct abo_loeschen_anfrage_msg : public msg {
-  abo_loeschen_anfrage_msg(net::http::client::url from,
-                           timestamp_t,
-                           std::string const& sender,
-                           std::vector<abo_id_t>& abo_ids);
-
-  constexpr msg_type get_msg_type() const override {
-    return msg_type::kAboLoeschen;
-  }
-
-  std::string const& sender_;
+struct abo_loeschen_anfrage_msg {
+  net::http::client::url from_;
+  timestamp_t t_;
+  std::string sender_;
   std::vector<abo_id_t> abo_ids_;
 };
 
-struct abo_antwort_msg : public msg {
-  abo_antwort_msg(net::http::client::url from,
-                  timestamp_t,
-                  bool success,
-                  error_code_t);
-
-  constexpr msg_type get_msg_type() const override {
-    return msg_type::kAboAntwort;
-  }
-
+struct abo_antwort_msg {
+  net::http::client::url from_;
+  timestamp_t t_;
   bool success_;
   error_code_t error_code_;
 };
 
-struct daten_bereit_anfrage_msg : public msg {
-  daten_bereit_anfrage_msg(net::http::client::url from,
-                           timestamp_t,
-                           std::string const& sender);
-
-  constexpr msg_type get_msg_type() const override {
-    return msg_type::kDatenBereitAnfrage;
-  }
-
-  std::string const& sender_;
-};
-
-struct daten_bereit_antwort_msg : public msg {
-  daten_bereit_antwort_msg(net::http::client::url from,
-                           timestamp_t,
-                           bool success,
-                           error_code_t);
-
-  constexpr msg_type get_msg_type() const override {
-    return msg_type::kDatenBereitAntwort;
-  }
-
-  bool success_;
-  error_code_t error_code_;
-};
-
-struct daten_abrufen_anfrage_msg : public msg {
-  daten_abrufen_anfrage_msg(net::http::client::url from,
-                            timestamp_t,
-                            std::string const& sender,
-                            bool all_datasets);
-
-  constexpr msg_type get_msg_type() const override {
-    return msg_type::kDatenAbrufenAnfrage;
-  }
-
-  std::string const& sender_;
-  bool all_datasets_;
-};
-
-struct daten_abrufen_antwort_msg : public msg {
-  daten_abrufen_antwort_msg(net::http::client::url from)
-
-      constexpr msg_type get_msg_type() const override {
-    return msg_type::kDatenAbrufenAntwort;
-  }
-
-  // TODO
-};
-
-struct status_anfrage_msg : public msg {
-  constexpr msg_type get_msg_type() const override {
-    return msg_type::kStatusAnfrage;
-  }
-
+struct daten_bereit_anfrage_msg {
+  net::http::client::url from_;
+  timestamp_t t_;
   std::string sender_;
 };
 
-struct status_antwort_msg : public msg {
-  constexpr msg_type get_msg_type() const override {
-    return msg_type::kStatusAntwort;
-  }
+struct daten_bereit_antwort_msg {
+  net::http::client::url from_;
+  timestamp_t t_;
+  bool success_;
+  error_code_t error_code_;
+};
 
+struct daten_abrufen_anfrage_msg {
+  net::http::client::url from_;
+  timestamp_t t_;
+  std::string sender_;
+  bool all_datasets_;
+};
+
+struct daten_abrufen_antwort_msg {
+  net::http::client::url from_;
+  timestamp_t t_;
+  // TODO
+};
+
+struct status_anfrage_msg {
+  net::http::client::url from_;
+  timestamp_t t_;
+  std::string sender_;
+};
+
+struct status_antwort_msg {
+  net::http::client::url from_;
+  timestamp_t t_;
   bool success_;
   bool data_rdy_;
   timestamp_t start_;
 };
 
-struct client_status_anfrage_msg : public msg {
-  constexpr msg_type get_msg_type() const override {
-    return msg_type::kClientStatusAnfrage;
-  }
-
+struct client_status_anfrage_msg {
+  net::http::client::url from_;
+  timestamp_t t_;
   std::string sender_;
   bool req_active_abos_;
 };
 
-struct client_status_antwort_msg : public msg {
-  client_status_antwort_msg(net::http::client::url from_,
-                            timestamp_t t,
-                            status status,
-                            timestamp_t start,
-                            std::vector<subscription> const& subscriptions);
-
-  constexpr msg_type get_msg_type() const override {
-    return msg_type::kClientStatusAntwort;
-  }
-
-  status status_;
+struct client_status_antwort_msg {
+  net::http::client::url from_;
+  timestamp_t t_;
+  bool success_;
   timestamp_t start_;
-  std::vector<vdv::subscription> const& subscriptions_;
+  std::vector<vdv::subscription> subscriptions_;
 };
+
+using msg_envelope = std::variant<abo_anfrage_msg,
+                                  abo_loeschen_anfrage_msg,
+                                  abo_antwort_msg,
+                                  daten_bereit_anfrage_msg,
+                                  daten_bereit_antwort_msg,
+                                  daten_abrufen_anfrage_msg,
+                                  daten_abrufen_antwort_msg,
+                                  status_anfrage_msg,
+                                  status_antwort_msg,
+                                  client_status_anfrage_msg,
+                                  client_status_antwort_msg>;
 
 }  // namespace vdv

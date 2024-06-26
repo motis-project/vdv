@@ -51,6 +51,14 @@ void add_bestaetigung_node(pugi::xml_node& node,
       std::to_string(error_code).c_str();
 }
 
+void add_status_node(pugi::xml_node& node,
+                     timestamp_t const t,
+                     bool const success) {
+  auto status_node = node.append_child("Status");
+  status_node.append_attribute("Zst") = timestamp_to_string(t).c_str();
+  status_node.append_attribute("Ergebnis") = success ? "ok" : "notok";
+}
+
 std::string xml_to_str(pugi::xml_document const& doc) {
   std::stringstream ss{};
   doc.save(ss, "  ", pugi::format_default, pugi::xml_encoding::encoding_latin1);
@@ -147,9 +155,7 @@ std::string status_antwort_xml_str(timestamp_t const t,
                                    timestamp_t const start) {
   auto doc = make_xml_doc();
   auto status_antwort_node = doc.append_child("StatusAntwort");
-  auto status_node = status_antwort_node.append_child("Status");
-  status_node.append_attribute("Zst") = timestamp_to_string(t).c_str();
-  status_node.append_attribute("Ergebnis") = success ? "ok" : "notok";
+  add_status_node(status_antwort_node, t, success);
   auto daten_bereit_node = status_antwort_node.append_child("DatenBereit");
   daten_bereit_node.append_child(pugi::node_pcdata)
       .set_value(data_rdy ? "true" : "false");
@@ -166,6 +172,16 @@ std::string client_status_anfrage_xml_str(std::string const& sender,
   if (req_active_abos) {
     client_status_anfrage_node.append_attribute("MitAbos") = "true";
   }
+  return xml_to_str(doc);
+}
+
+std::string client_status_antwort_xml_str(timestamp_t const t,
+                                          bool const success,
+                                          timestamp_t const start) {
+  auto doc = make_xml_doc();
+  auto client_status_antwort_node = doc.append_child("ClientStatusAntwort");
+  add_status_node(client_status_antwort_node, t, success);
+  add_start_dienst_zst_node(client_status_antwort_node, start);
   return xml_to_str(doc);
 }
 

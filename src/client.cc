@@ -3,6 +3,7 @@
 
 namespace vdv {
 
+/*
 bool client::subscribe(net::http::client::url server_addr,
                        std::chrono::seconds hysteresis,
                        std::chrono::minutes look_ahead) {
@@ -12,5 +13,5 @@ bool client::subscribe(net::http::client::url server_addr,
 
   return false;
 }
-
+*/
 }  // namespace vdv

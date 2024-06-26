@@ -2,6 +2,8 @@
 
 #include "vdv/timestamp.h"
 
+#include "net/http/client/url.h"
+
 namespace vdv {
 
 struct subscription {

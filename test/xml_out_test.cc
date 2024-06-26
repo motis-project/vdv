@@ -5,6 +5,8 @@
 
 #include <chrono>
 
+#include "xml_test_data.h"
+
 using namespace vdv;
 using namespace std::literals::chrono_literals;
 
@@ -14,121 +16,55 @@ std::string result_str(std::string const& str) {
   return ss.str();
 }
 
-auto const t = vdv::timestamp_from_string("2024-06-21T13:37:23");
-
-constexpr auto const abo_anfrage_expected = R"(
-<?xml version="1.0" encoding="iso-8859-1"?>
-<AboAnfrage Sender="motis" Zst="2024-06-21T13:37:23">
-  <AboAUS AboID="1" VerfallZst="2024-06-22T13:37:23">
-    <Hysterese>30</Hysterese>
-    <Vorschauzeit>1440</Vorschauzeit>
-  </AboAUS>
-</AboAnfrage>
-)";
-
 TEST(xml_out, abo_anfrage) {
-  EXPECT_EQ(abo_anfrage_expected,
+  EXPECT_EQ(abo_anfrage_str,
             result_str(abo_anfrage_xml_str("motis", t, 1, 30s, 1440min)));
 }
 
-constexpr auto const abo_loeschen_expected = R"(
-<?xml version="1.0" encoding="iso-8859-1"?>
-<AboAnfrage Sender="motis" Zst="2024-06-21T13:37:23">
-  <AboLoeschen>42</AboLoeschen>
-  <AboLoeschen>23</AboLoeschen>
-</AboAnfrage>
-)";
-
 TEST(xml_out, abo_loeschen) {
-  EXPECT_EQ(abo_loeschen_expected,
+  EXPECT_EQ(abo_loeschen_str,
             result_str(abo_loeschen_anfrage_xml_str("motis", t, {42, 23})));
 }
 
-constexpr auto const abo_antwort_expected = R"(
-<?xml version="1.0" encoding="iso-8859-1"?>
-<AboAntwort>
-  <Bestaetigung Zst="2024-06-21T13:37:23" Ergebnis="ok" Fehlernummer="0" />
-</AboAntwort>
-)";
-
 TEST(xml_out, abo_antwort) {
-  EXPECT_EQ(abo_antwort_expected, result_str(abo_antwort_xml_str(t, true, 0)));
+  EXPECT_EQ(abo_antwort_str, result_str(abo_antwort_xml_str(t, true, 0)));
 }
 
-constexpr auto const daten_bereit_anfrage_expected = R"(
-<?xml version="1.0" encoding="iso-8859-1"?>
-<DatenBereitAnfrage Sender="motis" Zst="2024-06-21T13:37:23" />
-)";
-
 TEST(xml_out, daten_bereit_anfrage) {
-  EXPECT_EQ(daten_bereit_anfrage_expected,
+  EXPECT_EQ(daten_bereit_anfrage_str,
             result_str(daten_bereit_anfrage_xml_str("motis", t)));
 }
 
-constexpr auto const daten_bereit_antwort_expected = R"(
-<?xml version="1.0" encoding="iso-8859-1"?>
-<DatenBereitAntwort>
-  <Bestaetigung Zst="2024-06-21T13:37:23" Ergebnis="ok" Fehlernummer="0" />
-</DatenBereitAntwort>
-)";
-
 TEST(xml_out, daten_bereit_antwort) {
-  EXPECT_EQ(daten_bereit_antwort_expected,
+  EXPECT_EQ(daten_bereit_antwort_str,
             result_str(daten_bereit_antwort_xml_str(t, true, 0)));
 }
 
-constexpr auto const daten_abrufen_anfrage_all_datasets_expected = R"(
-<?xml version="1.0" encoding="iso-8859-1"?>
-<DatenAbrufenAnfrage Sender="motis" Zst="2024-06-21T13:37:23">
-  <DatensatzAlle>true</DatensatzAlle>
-</DatenAbrufenAnfrage>
-)";
-
-TEST(xml_out, daten_abrufen_anfrage_all_datasets) {
-  EXPECT_EQ(daten_abrufen_anfrage_all_datasets_expected,
+TEST(xml_out, daten_abrufen_anfrage_all_datasets_str) {
+  EXPECT_EQ(daten_abrufen_anfrage_all_datasets_str,
             result_str(daten_abrufen_anfrage_xml_str("motis", t, true)));
 }
 
-constexpr auto const daten_abrufen_anfrage_expected = R"(
-<?xml version="1.0" encoding="iso-8859-1"?>
-<DatenAbrufenAnfrage Sender="motis" Zst="2024-06-21T13:37:23" />
-)";
-
 TEST(xml_out, daten_abrufen_anfrage) {
-  EXPECT_EQ(daten_abrufen_anfrage_expected,
+  EXPECT_EQ(daten_abrufen_anfrage_str,
             result_str(daten_abrufen_anfrage_xml_str("motis", t, false)));
 }
 
-constexpr auto const status_anfrage_expected = R"(
-<?xml version="1.0" encoding="iso-8859-1"?>
-<StatusAnfrage Sender="motis" Zst="2024-06-21T13:37:23" />
-)";
-
 TEST(xml_out, status_anfrage) {
-  EXPECT_EQ(status_anfrage_expected,
-            result_str(status_anfrage_xml_str("motis", t)));
+  EXPECT_EQ(status_anfrage_str, result_str(status_anfrage_xml_str("motis", t)));
 }
 
-constexpr auto const status_antwort_expected = R"(
-<?xml version="1.0" encoding="iso-8859-1"?>
-<StatusAntwort>
-  <Status Zst="2024-06-21T13:37:23" Ergebnis="ok" />
-  <DatenBereit>true</DatenBereit>
-  <StartDienstZst>2024-06-21T13:37:23</StartDienstZst>
-</StatusAntwort>
-)";
-
 TEST(xml_out, status_antwort) {
-  EXPECT_EQ(status_antwort_expected,
+  EXPECT_EQ(status_antwort_str,
             result_str(status_antwort_xml_str(t, true, true, t)));
 }
 
-constexpr auto const client_status_anfrage_expected = R"(
-<?xml version="1.0" encoding="iso-8859-1"?>
-<ClientStatusAnfrage Sender="motis" Zst="2024-06-21T13:37:23" MitAbos="true" />
-)";
-
 TEST(xml_out, client_status_anfrage) {
-  EXPECT_EQ(client_status_anfrage_expected,
+  EXPECT_EQ(client_status_anfrage_str,
             result_str(client_status_anfrage_xml_str("motis", t, true)));
+}
+
+TEST(xml_out, client_status_antwort) {
+  EXPECT_EQ(client_status_antwort_str,
+            result_str(client_status_antwort_xml_str(t, true, start)));
 }

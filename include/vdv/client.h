@@ -1,6 +1,9 @@
 #pragma once
 
+#include "vdv/subscription.h"
 #include "vdv/types.h"
+
+#include "net/http/client/url.h"
 
 #include <string>
 #include <vector>
