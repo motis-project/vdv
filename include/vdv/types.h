@@ -32,8 +32,8 @@ struct rt_run {
   std::string operator_;
   std::chrono::year_month_day date_;
   bool complete_;  // if false only stops with updates will be transmitted
-  bool canceled_;
-  bool additional_run_;
+  bool canceled_{false};
+  bool additional_run_{false};
   std::vector<rt_stop> stops_;
 };
 
