@@ -50,7 +50,10 @@ struct daten_abrufen_anfrage_msg {
 struct daten_abrufen_antwort_msg {
   net::http::client::url from_;
   timestamp_t t_;
-  // TODO
+  bool success_;
+  error_code_t error_code_;
+  abo_id_t abo_id_;
+  std::vector<rt_run> rt_runs_;
 };
 
 struct status_anfrage_msg {
