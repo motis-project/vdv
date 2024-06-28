@@ -9,6 +9,13 @@
 using namespace vdv;
 using namespace std::literals::chrono_literals;
 
+TEST(xml_in, empty) {
+  EXPECT_FALSE(parse("").has_value());
+  EXPECT_FALSE(parse(empty_xml_str).has_value());
+}
+
+TEST(xml_in, unsupported) { EXPECT_FALSE(parse(unsupported_str).has_value()); }
+
 TEST(xml_in, abo_anfrage) {
   auto const msg = parse(abo_anfrage_str);
   ASSERT_TRUE(msg.has_value());

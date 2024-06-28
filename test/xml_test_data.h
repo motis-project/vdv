@@ -2,6 +2,15 @@
 
 auto const t = vdv::timestamp_from_string("2024-06-21T13:37:23");
 
+constexpr auto const empty_xml_str = R"(
+<?xml version="1.0" encoding="iso-8859-1"?>
+)";
+
+constexpr auto const unsupported_str = R"(
+<?xml version="1.0" encoding="iso-8859-1"?>
+<unsupported>I'm an unsupported tag</unsupported>
+)";
+
 constexpr auto const abo_anfrage_str = R"(
 <?xml version="1.0" encoding="iso-8859-1"?>
 <AboAnfrage Sender="motis" Zst="2024-06-21T13:37:23">

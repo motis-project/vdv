@@ -519,7 +519,7 @@ std::optional<client_status_antwort_msg> parse_client_status_antwort(
   return client_status_antwort;
 }
 
-static auto parse_fun_map = std::unordered_map<
+static auto const parse_fun_map = std::unordered_map<
     std::string,
     std::function<std::optional<vdv_msg>(pugi::xml_document const&)>>{
     {"AboAnfrage", parse_abo_anfrage},
@@ -547,10 +547,10 @@ std::optional<vdv_msg> parse(std::string const& str) {
     return std::nullopt;
   }
 
-  if (!doc.empty() && parse_fun_map.contains(doc.first_child().name())) {
-    return parse_fun_map[doc.first_child().name()](doc);
+  auto const msg_type_node = doc.first_child();
+  if (msg_type_node && parse_fun_map.contains(msg_type_node.name())) {
+    return parse_fun_map.at(msg_type_node.name())(doc);
   }
-  std::cout << "Warning: no applicable parsing function found\n";
   return std::nullopt;
 }
 
