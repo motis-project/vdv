@@ -9,8 +9,6 @@
 using namespace vdv;
 using namespace std::literals::chrono_literals;
 
-TEST(xml_in, scratch) { auto const msg = parse(abo_anfrage_str); }
-
 TEST(xml_in, abo_anfrage) {
   auto const msg = parse(abo_anfrage_str);
   ASSERT_TRUE(msg.has_value());
