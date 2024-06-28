@@ -53,7 +53,7 @@ struct daten_abrufen_antwort_msg {
   bool success_;
   error_code_t error_code_;
   abo_id_t abo_id_;
-  std::vector<rt_run> rt_runs_;
+  std::vector<vdv_run> runs_;
 };
 
 struct status_anfrage_msg {

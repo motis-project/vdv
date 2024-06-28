@@ -124,8 +124,8 @@ constexpr auto const daten_abrufen_antwort_str = R"(
         <HaltID>de:14523:309</HaltID>
         <Abfahrtszeit>2024-06-21T13:37:23</Abfahrtszeit>
         <Ankunftszeit>2024-06-21T13:37:23</Ankunftszeit>
-        <IstAbfahrtPrognose>2024-06-04T22:06:00</IstAbfahrtPrognose>
-        <IstAnkunftPrognose>2024-06-04T22:05:00</IstAnkunftPrognose>
+        <IstAbfahrtPrognose>2024-06-21T13:37:23</IstAbfahrtPrognose>
+        <IstAnkunftPrognose>2024-06-21T13:37:23</IstAnkunftPrognose>
         <AbfahrtssteigText>1</AbfahrtssteigText>
         <AnkunftssteigText>1</AnkunftssteigText>
         <Einsteigeverbot>false</Einsteigeverbot>
