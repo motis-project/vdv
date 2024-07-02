@@ -120,8 +120,10 @@ TEST(xml_in, daten_abrufen_antwort) {
   EXPECT_EQ(stop0.t_dep_.value(), t);
   EXPECT_FALSE(stop0.t_arr_rt_.has_value());
   EXPECT_FALSE(stop0.t_dep_rt_.has_value());
-  EXPECT_EQ(stop0.in_allowed_, true);
-  EXPECT_EQ(stop0.out_allowed_, true);
+  ASSERT_TRUE(stop0.in_allowed_.has_value());
+  EXPECT_EQ(stop0.in_allowed_.value(), true);
+  ASSERT_TRUE(stop0.out_allowed_.has_value());
+  EXPECT_EQ(stop0.out_allowed_.value(), true);
   EXPECT_EQ(stop0.additional_stop_, false);
 
   auto const& stop1 = run0.stops_[1];
@@ -134,8 +136,10 @@ TEST(xml_in, daten_abrufen_antwort) {
   EXPECT_EQ(stop1.t_dep_, t);
   EXPECT_FALSE(stop1.t_arr_rt_.has_value());
   EXPECT_FALSE(stop1.t_dep_rt_.has_value());
-  EXPECT_EQ(stop1.in_allowed_, true);
-  EXPECT_EQ(stop1.out_allowed_, true);
+  ASSERT_TRUE(stop1.in_allowed_.has_value());
+  EXPECT_EQ(stop1.in_allowed_.value(), true);
+  ASSERT_TRUE(stop1.out_allowed_.has_value());
+  EXPECT_EQ(stop1.out_allowed_.value(), true);
   EXPECT_EQ(stop1.additional_stop_, false);
 
   auto const& run1 = daten_abrufen_antwort_actual.runs_[1];
@@ -167,7 +171,9 @@ TEST(xml_in, daten_abrufen_antwort) {
   EXPECT_EQ(stop2.t_arr_rt_.value(), t);
   ASSERT_TRUE(stop2.t_dep_rt_.has_value());
   EXPECT_EQ(stop2.t_dep_rt_.value(), t);
+  ASSERT_TRUE(stop2.in_allowed_.has_value());
   EXPECT_EQ(stop2.in_allowed_, true);
+  ASSERT_TRUE(stop2.out_allowed_.has_value());
   EXPECT_EQ(stop2.out_allowed_, true);
   EXPECT_EQ(stop2.additional_stop_, false);
 }

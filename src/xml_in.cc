@@ -42,11 +42,25 @@ bool parse_bool(std::string const& str) {
   return result;
 }
 
-bool get_opt_bool(pugi::xml_node const& node,
-                  std::string const& str,
-                  bool fallback) {
+bool get_bool_with_fallback(pugi::xml_node const& node,
+                            std::string const& str,
+                            bool fallback) {
   auto const xpath = get_opt(node, str);
   return xpath ? parse_bool(xpath.node().child_value()) : fallback;
+}
+
+bool get_bool_attr_with_fallback(pugi::xml_node const& node,
+                                 std::string const& str,
+                                 bool fallback) {
+  auto const xpath = get_opt(node, str);
+  return xpath ? parse_bool(xpath.attribute().value()) : fallback;
+}
+
+std::optional<bool> get_opt_bool(pugi::xml_node const& node,
+                                 std::string const& str) {
+  auto const xpath = get_opt(node, str);
+  return xpath ? std::optional{parse_bool(xpath.node().child_value())}
+               : std::nullopt;
 }
 
 date::sys_days parse_date(std::string const& str) {
@@ -114,8 +128,8 @@ daten_abrufen_anfrage_msg parse_daten_abrufen_anfrage(
               get_req(doc, "DatenAbrufenAnfrage/@Zst").attribute().value()),
           .sender_ =
               get_req(doc, "DatenAbrufenAnfrage/@Sender").attribute().value(),
-          .all_datasets_ =
-              get_opt_bool(doc, "DatenAbrufenAnfrage/DatensatzAlle", false)};
+          .all_datasets_ = get_bool_with_fallback(
+              doc, "DatenAbrufenAnfrage/DatensatzAlle", false)};
 }
 
 daten_abrufen_antwort_msg parse_daten_abrufen_antwort(
@@ -124,8 +138,9 @@ daten_abrufen_antwort_msg parse_daten_abrufen_antwort(
     auto const get_run = [](pugi::xml_node const& run_node) -> vdv_run {
       auto const get_stops = [&]() {
         auto const get_stop = [](pugi::xml_node const& stop_node) -> vdv_stop {
-          auto const pass_through =
-              parse_bool(get_req(stop_node, "Durchfahrt").node().child_value());
+          auto const pass_through = get_opt_bool(stop_node, "Durchfahrt");
+          auto const no_enter = get_opt_bool(stop_node, "Einsteigeverbot");
+          auto const no_exit = get_opt_bool(stop_node, "Aussteigeverbot");
           return {
               .stop_id_ = get_req(stop_node, "HaltID").node().child_value(),
               .platform_arr_ = get_opt_str(stop_node, "AnkunftssteigText"),
@@ -134,16 +149,18 @@ daten_abrufen_antwort_msg parse_daten_abrufen_antwort(
               .t_dep_ = get_opt_timestamp(stop_node, "Abfahrtszeit"),
               .t_arr_rt_ = get_opt_timestamp(stop_node, "IstAnkunftPrognose"),
               .t_dep_rt_ = get_opt_timestamp(stop_node, "IstAbfahrtPrognose"),
-              .in_allowed_ = !pass_through &&
-                             !parse_bool(get_req(stop_node, "Einsteigeverbot")
-                                             .node()
-                                             .child_value()),
-              .out_allowed_ = !pass_through &&
-                              !parse_bool(get_req(stop_node, "Aussteigeverbot")
-                                              .node()
-                                              .child_value()),
-              .additional_stop_ = parse_bool(get)};
+              .in_allowed_ =
+                  pass_through.has_value() && pass_through.value() ? false
+                  : no_enter.has_value() ? std::optional{!no_enter.value()}
+                                         : std::nullopt,
+              .out_allowed_ =
+                  pass_through.has_value() && pass_through.value() ? false
+                  : no_exit.has_value() ? std::optional{!no_exit.value()}
+                                        : std::nullopt,
+              .additional_stop_ =
+                  get_bool_with_fallback(stop_node, "Zusatzhalt", false)};
         };
+
         auto stops = std::vector<vdv_stop>{};
         auto const stops_xpath = run_node.select_nodes("IstHalt");
         for (auto const& stop_xpath : stops_xpath) {
@@ -151,6 +168,7 @@ daten_abrufen_antwort_msg parse_daten_abrufen_antwort(
         }
         return stops;
       };
+
       return {
           .t_ = parse_timestamp(get_req(run_node, "@Zst").attribute().value()),
           .route_id_ = get_req(run_node, "LinienID").node().child_value(),
@@ -169,8 +187,9 @@ daten_abrufen_antwort_msg parse_daten_abrufen_antwort(
                                   .child_value()),
           .complete_ = parse_bool(
               get_req(run_node, "Komplettfahrt").node().child_value()),
-          .canceled_ = get_opt_bool(run_node, "FaelltAus", false),
-          .additional_run_ = get_opt_bool(run_node, "Zusatzfahrt", false),
+          .canceled_ = get_bool_with_fallback(run_node, "FaelltAus", false),
+          .additional_run_ =
+              get_bool_with_fallback(run_node, "Zusatzfahrt", false),
           .stops_ = get_stops()};
     };
 
@@ -201,119 +220,48 @@ daten_abrufen_antwort_msg parse_daten_abrufen_antwort(
           .runs_ = get_runs()};
 }
 
-std::optional<status_anfrage_msg> parse_status_anfrage(
-    pugi::xml_document const& doc) {
-  auto status_anfrage = status_anfrage_msg{};
-
-  auto const sender_xpath = find_required_node(doc, "StatusAnfrage/@Sender");
-  if (!sender_xpath) {
-    return std::nullopt;
-  }
-  status_anfrage.sender_ = sender_xpath.attribute().value();
-
-  auto const timestamp_xpath = find_required_node(doc, "StatusAnfrage/@Zst");
-  if (!timestamp_xpath) {
-    return std::nullopt;
-  }
-  status_anfrage.t_ = parse_timestamp(timestamp_xpath.attribute().value());
-
-  return status_anfrage;
+status_anfrage_msg parse_status_anfrage(pugi::xml_document const& doc) {
+  return {.t_ = parse_timestamp(
+              get_req(doc, "StatusAnfrage/@Zst").attribute().value()),
+          .sender_ = get_req(doc, "StatusAnfrage/@Sender").attribute().value()};
 }
 
-std::optional<status_antwort_msg> parse_status_antwort(
-    pugi::xml_document const& doc) {
-  auto status_antwort = status_antwort_msg{};
-
-  auto const timestamp_xpath =
-      find_required_node(doc, "StatusAntwort/Status/@Zst");
-  if (!timestamp_xpath) {
-    return std::nullopt;
-  }
-  status_antwort.t_ = parse_timestamp(timestamp_xpath.attribute().value());
-
-  auto const success_xpath =
-      find_required_node(doc, "StatusAntwort/Status/@Ergebnis");
-  if (!success_xpath) {
-    return std::nullopt;
-  }
-  status_antwort.success_ =
-      std::string_view{success_xpath.attribute().value()} == "ok";
-
-  auto const data_rdy_xpath =
-      find_required_node(doc, "StatusAntwort/DatenBereit");
-  if (!data_rdy_xpath) {
-    return std::nullopt;
-  }
-  std::istringstream{data_rdy_xpath.node().child_value()} >> std::boolalpha >>
-      status_antwort.data_rdy_;
-
-  auto const start_time_xpath =
-      find_required_node(doc, "StatusAntwort/StartDienstZst");
-  if (!start_time_xpath) {
-    return std::nullopt;
-  }
-  status_antwort.start_ =
-      parse_timestamp(start_time_xpath.node().child_value());
-
-  return status_antwort;
+status_antwort_msg parse_status_antwort(pugi::xml_document const& doc) {
+  return {
+      .t_ = parse_timestamp(
+          get_req(doc, "StatusAntwort/Status/@Zst").attribute().value()),
+      .success_ = parse_success(
+          get_req(doc, "StatusAntwort/Status/@Ergebnis").attribute().value()),
+      .data_rdy_ =
+          get_bool_with_fallback(doc, "StatusAntwort/DatenBereit", false),
+      .start_ = parse_timestamp(
+          get_req(doc, "StatusAntwort/StartDienstZst").node().child_value())};
 }
 
-std::optional<client_status_anfrage_msg> parse_client_status_anfrage(
+client_status_anfrage_msg parse_client_status_anfrage(
     pugi::xml_document const& doc) {
-  auto client_status_anfrage = client_status_anfrage_msg{};
-
-  auto sender_xpath = find_required_node(doc, "ClientStatusAnfrage/@Sender");
-  if (!sender_xpath) {
-    return std::nullopt;
-  }
-  client_status_anfrage.sender_ = sender_xpath.attribute().value();
-
-  auto timestamp_xpath = find_required_node(doc, "ClientStatusAnfrage/@Zst");
-  if (!timestamp_xpath) {
-    return std::nullopt;
-  }
-  client_status_anfrage.t_ =
-      parse_timestamp(timestamp_xpath.attribute().value());
-
-  auto req_active_abos_xpath =
-      find_optional_node(doc, "ClientStatusAnfrage/@MitAbos");
-  if (req_active_abos_xpath) {
-    std::istringstream{req_active_abos_xpath.attribute().value()} >>
-        std::boolalpha >> client_status_anfrage.req_active_abos_;
-  }
-
-  return client_status_anfrage;
+  return {.t_ = parse_timestamp(
+              get_req(doc, "ClientStatusAnfrage/@Zst").attribute().value()),
+          .sender_ =
+              get_req(doc, "ClientStatusAnfrage/@Sender").attribute().value(),
+          .req_active_abos_ = get_bool_attr_with_fallback(
+              doc, "ClientStatusAnfrage/@MitAbos", false)};
 }
 
-std::optional<client_status_antwort_msg> parse_client_status_antwort(
+client_status_antwort_msg parse_client_status_antwort(
     pugi::xml_document const& doc) {
-  auto client_status_antwort = client_status_antwort_msg{};
-
-  auto const timestamp_xpath =
-      find_required_node(doc, "ClientStatusAntwort/Status/@Zst");
-  if (!timestamp_xpath) {
-    return std::nullopt;
-  }
-  client_status_antwort.t_ =
-      parse_timestamp(timestamp_xpath.attribute().value());
-
-  auto const success_xpath =
-      find_required_node(doc, "ClientStatusAntwort/Status/@Ergebnis");
-  if (!success_xpath) {
-    return std::nullopt;
-  }
-  client_status_antwort.success_ =
-      std::string_view{success_xpath.attribute().value()} == "ok";
-
-  auto const start_time_xpath =
-      find_required_node(doc, "ClientStatusAntwort/StartDienstZst");
-  if (!start_time_xpath) {
-    return std::nullopt;
-  }
-  client_status_antwort.start_ =
-      parse_timestamp(start_time_xpath.node().child_value());
-
-  return client_status_antwort;
+  return {
+      .t_ = parse_timestamp(
+          get_req(doc, "ClientStatusAntwort/Status/@Zst").attribute().value()),
+      .success_ =
+          parse_success(get_req(doc, "ClientStatusAntwort/Status/@Ergebnis")
+                            .attribute()
+                            .value()),
+      .start_ =
+          parse_timestamp(get_req(doc, "ClientStatusAntwort/StartDienstZst")
+                              .node()
+                              .child_value()),
+      .subscriptions_ = std::vector<subscription>{}};
 }
 
 std::optional<vdv_msg> parse(std::string const& str) {
