@@ -17,13 +17,13 @@ void add_sender_zst_attr(pugi::xml_node& node,
                          std::string const& sender,
                          timestamp_t const t) {
   node.append_attribute("Sender") = sender.c_str();
-  node.append_attribute("Zst") = timestamp_to_string(t).c_str();
+  node.append_attribute("Zst") = to_string(t).c_str();
 }
 
 void add_start_dienst_zst_node(pugi::xml_node& node, timestamp_t const start) {
   auto start_dienst_zst_node = node.append_child("StartDienstZst");
   start_dienst_zst_node.append_child(pugi::node_pcdata)
-      .set_value(timestamp_to_string(start).c_str());
+      .set_value(to_string(start).c_str());
 }
 
 pugi::xml_node add_abo_anfrage_node(pugi::xml_node& node,
@@ -45,7 +45,7 @@ void add_bestaetigung_node(pugi::xml_node& node,
                            bool const success,
                            std::uint32_t const error_code) {
   auto bestaetigung_node = node.append_child("Bestaetigung");
-  bestaetigung_node.append_attribute("Zst") = timestamp_to_string(t).c_str();
+  bestaetigung_node.append_attribute("Zst") = to_string(t).c_str();
   bestaetigung_node.append_attribute("Ergebnis") = success ? "ok" : "notok";
   bestaetigung_node.append_attribute("Fehlernummer") =
       std::to_string(error_code).c_str();
@@ -55,7 +55,7 @@ void add_status_node(pugi::xml_node& node,
                      timestamp_t const t,
                      bool const success) {
   auto status_node = node.append_child("Status");
-  status_node.append_attribute("Zst") = timestamp_to_string(t).c_str();
+  status_node.append_attribute("Zst") = to_string(t).c_str();
   status_node.append_attribute("Ergebnis") = success ? "ok" : "notok";
 }
 
@@ -75,7 +75,7 @@ std::string abo_anfrage_xml_str(std::string const& sender,
   auto abo_aus_node = abo_anfrage_node.append_child("AboAUS");
   abo_aus_node.append_attribute("AboID") = std::to_string(abo_id).c_str();
   abo_aus_node.append_attribute("VerfallZst") =
-      timestamp_to_string(t + look_ahead).c_str();
+      to_string(t + look_ahead).c_str();
   auto hysterese_node = abo_aus_node.append_child("Hysterese");
   hysterese_node.append_child(pugi::node_pcdata)
       .set_value(std::to_string(hysteresis.count()).c_str());
@@ -99,8 +99,7 @@ std::string daten_bereit_anfrage_xml_str(std::string const& sender,
   auto doc = make_xml_doc();
   auto daten_bereit_anfrage_node = doc.append_child("DatenBereitAnfrage");
   daten_bereit_anfrage_node.append_attribute("Sender") = sender.c_str();
-  daten_bereit_anfrage_node.append_attribute("Zst") =
-      timestamp_to_string(t).c_str();
+  daten_bereit_anfrage_node.append_attribute("Zst") = to_string(t).c_str();
   return xml_to_str(doc);
 }
 
@@ -119,8 +118,7 @@ std::string daten_abrufen_anfrage_xml_str(std::string const& sender,
   auto doc = make_xml_doc();
   auto daten_abrufen_anfrage_node = doc.append_child("DatenAbrufenAnfrage");
   daten_abrufen_anfrage_node.append_attribute("Sender") = sender.c_str();
-  daten_abrufen_anfrage_node.append_attribute("Zst") =
-      timestamp_to_string(t).c_str();
+  daten_abrufen_anfrage_node.append_attribute("Zst") = to_string(t).c_str();
   if (all_datasets) {
     auto datensatz_alle_node =
         daten_abrufen_anfrage_node.append_child("DatensatzAlle");

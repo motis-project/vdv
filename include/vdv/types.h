@@ -13,15 +13,15 @@ using error_code_t = std::uint32_t;
 
 struct vdv_stop {
   std::string stop_id_;
-  std::string platform_arr_;
-  std::string platform_dep_;
+  std::optional<std::string> platform_arr_;
+  std::optional<std::string> platform_dep_;
   std::optional<timestamp_t> t_arr_;
   std::optional<timestamp_t> t_dep_;
   std::optional<timestamp_t> t_arr_rt_;
   std::optional<timestamp_t> t_dep_rt_;
-  bool in_allowed_;
-  bool out_allowed_;
-  bool additional_stop_;
+  std::optional<bool> in_allowed_;
+  std::optional<bool> out_allowed_;
+  std::optional<bool> additional_stop_;
 };
 
 struct vdv_run {

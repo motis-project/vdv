@@ -11,7 +11,6 @@
 namespace vdv {
 
 struct abo_anfrage_msg {
-  net::http::client::url from_;
   timestamp_t t_;
   std::string sender_;
   abo_id_t abo_id_;
@@ -21,34 +20,29 @@ struct abo_anfrage_msg {
 };
 
 struct abo_antwort_msg {
-  net::http::client::url from_;
   timestamp_t t_;
   bool success_;
   error_code_t error_code_;
 };
 
 struct daten_bereit_anfrage_msg {
-  net::http::client::url from_;
   timestamp_t t_;
   std::string sender_;
 };
 
 struct daten_bereit_antwort_msg {
-  net::http::client::url from_;
   timestamp_t t_;
   bool success_;
   error_code_t error_code_;
 };
 
 struct daten_abrufen_anfrage_msg {
-  net::http::client::url from_;
   timestamp_t t_;
   std::string sender_;
   bool all_datasets_{false};
 };
 
 struct daten_abrufen_antwort_msg {
-  net::http::client::url from_;
   timestamp_t t_;
   bool success_;
   error_code_t error_code_;
@@ -57,13 +51,11 @@ struct daten_abrufen_antwort_msg {
 };
 
 struct status_anfrage_msg {
-  net::http::client::url from_;
   timestamp_t t_;
   std::string sender_;
 };
 
 struct status_antwort_msg {
-  net::http::client::url from_;
   timestamp_t t_;
   bool success_;
   bool data_rdy_;
@@ -71,14 +63,12 @@ struct status_antwort_msg {
 };
 
 struct client_status_anfrage_msg {
-  net::http::client::url from_;
   timestamp_t t_;
   std::string sender_;
   bool req_active_abos_{false};
 };
 
 struct client_status_antwort_msg {
-  net::http::client::url from_;
   timestamp_t t_;
   bool success_;
   timestamp_t start_;
