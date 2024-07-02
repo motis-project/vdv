@@ -6,6 +6,6 @@
 
 namespace vdv {
 
-std::optional<vdv_msg> parse(std::string const&);
+vdv_msg parse(std::string const&);
 
 }  // namespace vdv

@@ -264,23 +264,16 @@ client_status_antwort_msg parse_client_status_antwort(
       .subscriptions_ = std::vector<subscription>{}};
 }
 
-std::optional<vdv_msg> parse(std::string const& str) {
+vdv_msg parse(std::string const& str) {
   auto doc = pugi::xml_document{};
   auto result = doc.load_string(str.c_str());
 
-  // Error Handling from https://pugixml.org/docs/manual.html#loading
-  if (!result) {
-    std::cout << "XML [" << str << "] parsed with errors, attr value: ["
-              << doc.child("node").attribute("attr").value()
-              << "]\nError description: " << result.description()
-              << "\nError offset: " << result.offset << " (error at [..."
-              << (str.c_str() + result.offset) << "]\n\n";
-    return std::nullopt;
-  }
+  utl::verify(result, "XML [{}] parsed with errors: {}\n", str,
+              result.description());
 
   static auto const parse_fun_map =
-      std::unordered_map<std::string, std::function<std::optional<vdv_msg>(
-                                          pugi::xml_document const&)>>{
+      std::unordered_map<std::string,
+                         std::function<vdv_msg(pugi::xml_document const&)>>{
           {"AboAnfrage", parse_abo_anfrage},
           {"AboAntwort", parse_abo_antwort},
           {"DatenBereitAnfrage", parse_daten_bereit_anfrage},
@@ -293,10 +286,10 @@ std::optional<vdv_msg> parse(std::string const& str) {
           {"ClientStatusAntwort", parse_client_status_antwort}};
 
   auto const msg_type_node = doc.first_child();
-  if (msg_type_node && parse_fun_map.contains(msg_type_node.name())) {
-    return parse_fun_map.at(msg_type_node.name())(doc);
-  }
-  return std::nullopt;
+  utl::verify(parse_fun_map.contains(msg_type_node.name()),
+              "Can not parse message type {}", msg_type_node.name());
+
+  return parse_fun_map.at(msg_type_node.name())(doc);
 }
 
 }  // namespace vdv
