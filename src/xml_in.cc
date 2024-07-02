@@ -519,20 +519,6 @@ std::optional<client_status_antwort_msg> parse_client_status_antwort(
   return client_status_antwort;
 }
 
-static auto const parse_fun_map = std::unordered_map<
-    std::string,
-    std::function<std::optional<vdv_msg>(pugi::xml_document const&)>>{
-    {"AboAnfrage", parse_abo_anfrage},
-    {"AboAntwort", parse_abo_antwort},
-    {"DatenBereitAnfrage", parse_daten_bereit_anfrage},
-    {"DatenBereitAntwort", parse_daten_bereit_antwort},
-    {"DatenAbrufenAnfrage", parse_daten_abrufen_anfrage},
-    {"DatenAbrufenAntwort", parse_daten_abrufen_antwort},
-    {"StatusAnfrage", parse_status_anfrage},
-    {"StatusAntwort", parse_status_antwort},
-    {"ClientStatusAnfrage", parse_client_status_anfrage},
-    {"ClientStatusAntwort", parse_client_status_antwort}};
-
 std::optional<vdv_msg> parse(std::string const& str) {
   auto doc = pugi::xml_document{};
   auto result = doc.load_string(str.c_str());
@@ -540,12 +526,26 @@ std::optional<vdv_msg> parse(std::string const& str) {
   // Error Handling from https://pugixml.org/docs/manual.html#loading
   if (!result) {
     std::cout << "XML [" << str << "] parsed with errors, attr value: ["
-              << doc.child("node").attribute("attr").value() << "]\n";
-    std::cout << "Error description: " << result.description() << "\n";
-    std::cout << "Error offset: " << result.offset << " (error at [..."
+              << doc.child("node").attribute("attr").value()
+              << "]\nError description: " << result.description()
+              << "\nError offset: " << result.offset << " (error at [..."
               << (str.c_str() + result.offset) << "]\n\n";
     return std::nullopt;
   }
+
+  static auto const parse_fun_map =
+      std::unordered_map<std::string, std::function<std::optional<vdv_msg>(
+                                          pugi::xml_document const&)>>{
+          {"AboAnfrage", parse_abo_anfrage},
+          {"AboAntwort", parse_abo_antwort},
+          {"DatenBereitAnfrage", parse_daten_bereit_anfrage},
+          {"DatenBereitAntwort", parse_daten_bereit_antwort},
+          {"DatenAbrufenAnfrage", parse_daten_abrufen_anfrage},
+          {"DatenAbrufenAntwort", parse_daten_abrufen_antwort},
+          {"StatusAnfrage", parse_status_anfrage},
+          {"StatusAntwort", parse_status_antwort},
+          {"ClientStatusAnfrage", parse_client_status_anfrage},
+          {"ClientStatusAntwort", parse_client_status_antwort}};
 
   auto const msg_type_node = doc.first_child();
   if (msg_type_node && parse_fun_map.contains(msg_type_node.name())) {
