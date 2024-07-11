@@ -72,7 +72,7 @@ target_link_libraries(vdv-client vdv boost-program_options web-server http-clien
 # --- SERVER ---
 add_executable(vdv-server exe/server.cc)
 target_compile_features(vdv-server PUBLIC cxx_std_23)
-target_link_libraries(vdv-server vdv boost-program_options web-server http-client)
+target_link_libraries(vdv-server boost-program_options web-server http-client)
 
 
 # --- TEST ---
