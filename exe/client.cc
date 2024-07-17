@@ -48,7 +48,7 @@ int main(int ac, char** av) {
       net::http::client::url{http_str + server_ip + ":" + server_port};
 
   boost::asio::io_service ios;
-  auto client = net::http::client::make_http(ios, client_addr);
+  auto client = net::http::client::make_http(ios, server_addr);
 
   auto abo_req =
       make_abo_anfrage(server_addr, sender, timestamp_now(), 1, 60s, 480min);

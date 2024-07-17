@@ -58,7 +58,7 @@ endif ()
 file(GLOB_RECURSE vdv-files src/*.cc)
 add_library(vdv ${vdv-files})
 target_include_directories(vdv PUBLIC include)
-target_link_libraries(vdv PUBLIC pugixml utl http-client date)
+target_link_libraries(vdv PUBLIC pugixml utl http-client date nigiri boost)
 target_compile_features(vdv PUBLIC cxx_std_23)
 target_compile_options(vdv PRIVATE ${vdv-compile-options})
 

@@ -1,23 +1,23 @@
-[nigiri]
-  url=git@github.com:motis-project/nigiri.git
-  branch=master
-  commit=55cd64c43a1d9711306e596b5aa51f787dcf0db9
-[osr]
-  url=git@github.com:motis-project/osr.git
-  branch=platform
-  commit=1b8a2e628e25248f6114cd84149aa24f27e3bb73
-[utl]
-  url=git@github.com:motis-project/utl.git
-  branch=master
-  commit=fd7425b1a57a4b887318ba8c41a3184f8c4a50c5
-[adr]
-  url=git@github.com:triptix-tech/adr.git
-  branch=master
-  commit=bef3f11a8c1642939e7047bcebf3d2f3528b23a3
 [googletest]
   url=git@github.com:motis-project/googletest.git
   branch=master
   commit=34a46558609e05865c197f0260ab36daa7cbbb6e
+[utl]
+  url=git@github.com:motis-project/utl.git
+  branch=master
+  commit=fd7425b1a57a4b887318ba8c41a3184f8c4a50c5
+[date]
+  url=git@github.com:motis-project/date.git
+  branch=master
+  commit=646ba5e2e76636d9e65aaa3cf32e3e3a43defa2c
+[boost]
+  url=git@github.com:motis-project/boost.git
+  branch=master
+  commit=be5235eb2258d2ec19e32546ab767a62311d9b46
+[nigiri]
+  url=git@github.com:motis-project/nigiri.git
+  branch=master
+  commit=55cd64c43a1d9711306e596b5aa51f787dcf0db9
 [net]
   url=git@github.com:motis-project/net.git
   branch=master

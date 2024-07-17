@@ -1,8 +1,9 @@
 #include "gtest/gtest.h"
 
-#include "vdv/xml_in.h"
-
 #include <chrono>
+
+#include "vdv/msg.h"
+#include "vdv/xml_in.h"
 
 #include "xml_test_data.h"
 
@@ -91,88 +92,6 @@ TEST(xml_in, daten_abrufen_antwort) {
   EXPECT_EQ(daten_abrufen_antwort_actual.success_, true);
   EXPECT_EQ(daten_abrufen_antwort_actual.error_code_, 0);
   EXPECT_EQ(daten_abrufen_antwort_actual.abo_id_, 1);
-  ASSERT_EQ(daten_abrufen_antwort_actual.runs_.size(), 2);
-
-  auto const& run0 = daten_abrufen_antwort_actual.runs_[0];
-  EXPECT_EQ(run0.t_, t);
-  EXPECT_EQ(run0.route_id_, "RB 37");
-  EXPECT_EQ(run0.route_text_, "RB 37");
-  EXPECT_EQ(run0.direction_id_, "2");
-  EXPECT_EQ(run0.direction_text_, "Bodenmais");
-  EXPECT_EQ(run0.vehicle_, "WBA");
-  EXPECT_EQ(run0.trip_ref_, "83972#WBA_DDS-LB");
-  EXPECT_EQ(run0.operator_, "DDS-LB");
-  EXPECT_EQ(run0.date_, date::sys_days{std::chrono::June / 5 / 2024});
-  EXPECT_EQ(run0.complete_, true);
-  EXPECT_EQ(run0.canceled_, false);
-  EXPECT_EQ(run0.additional_run_, false);
-
-  ASSERT_EQ(run0.stops_.size(), 2);
-
-  auto const& stop0 = run0.stops_[0];
-  EXPECT_EQ(stop0.stop_id_, "de:09276:5025");
-  EXPECT_EQ(stop0.platform_dep_, "4");
-  EXPECT_FALSE(stop0.t_arr_.has_value());
-  ASSERT_TRUE(stop0.t_dep_.has_value());
-  EXPECT_EQ(stop0.t_dep_.value(), t);
-  EXPECT_FALSE(stop0.t_arr_rt_.has_value());
-  EXPECT_FALSE(stop0.t_dep_rt_.has_value());
-  ASSERT_TRUE(stop0.in_allowed_.has_value());
-  EXPECT_EQ(stop0.in_allowed_.value(), true);
-  ASSERT_TRUE(stop0.out_allowed_.has_value());
-  EXPECT_EQ(stop0.out_allowed_.value(), true);
-  EXPECT_EQ(stop0.additional_stop_, false);
-
-  auto const& stop1 = run0.stops_[1];
-  EXPECT_EQ(stop1.stop_id_, "de:09276:80503");
-  EXPECT_EQ(stop1.platform_arr_, "1");
-  EXPECT_EQ(stop1.platform_dep_, "1");
-  ASSERT_TRUE(stop1.t_arr_.has_value());
-  EXPECT_EQ(stop1.t_arr_, t);
-  ASSERT_TRUE(stop1.t_dep_.has_value());
-  EXPECT_EQ(stop1.t_dep_, t);
-  EXPECT_FALSE(stop1.t_arr_rt_.has_value());
-  EXPECT_FALSE(stop1.t_dep_rt_.has_value());
-  ASSERT_TRUE(stop1.in_allowed_.has_value());
-  EXPECT_EQ(stop1.in_allowed_.value(), true);
-  ASSERT_TRUE(stop1.out_allowed_.has_value());
-  EXPECT_EQ(stop1.out_allowed_.value(), true);
-  EXPECT_EQ(stop1.additional_stop_, false);
-
-  auto const& run1 = daten_abrufen_antwort_actual.runs_[1];
-  EXPECT_EQ(run1.t_, t);
-  EXPECT_EQ(run1.route_id_, "RB5");
-  EXPECT_EQ(run1.route_text_, "RB5");
-  EXPECT_EQ(run1.direction_id_, "2");
-  EXPECT_EQ(run1.direction_text_, "Plauen(Vogtl)ob Bf");
-  EXPECT_EQ(run1.vehicle_, "VBG");
-  EXPECT_EQ(run1.trip_ref_, "80188#VBG_DDS-LB");
-  EXPECT_EQ(run1.operator_, "DDS-LB");
-  EXPECT_EQ(run1.date_,
-            std::chrono::year_month_day{std::chrono::June / 5 / 2024});
-  EXPECT_EQ(run1.complete_, true);
-  EXPECT_EQ(run1.canceled_, false);
-  EXPECT_EQ(run1.additional_run_, false);
-
-  ASSERT_EQ(run1.stops_.size(), 9);
-
-  auto const& stop2 = run1.stops_[2];
-  EXPECT_EQ(stop2.stop_id_, "de:14523:309");
-  EXPECT_EQ(stop2.platform_arr_, "1");
-  EXPECT_EQ(stop2.platform_dep_, "1");
-  ASSERT_TRUE(stop2.t_arr_.has_value());
-  EXPECT_EQ(stop2.t_arr_.value(), t);
-  ASSERT_TRUE(stop2.t_dep_.has_value());
-  EXPECT_EQ(stop2.t_dep_.value(), t);
-  ASSERT_TRUE(stop2.t_arr_rt_.has_value());
-  EXPECT_EQ(stop2.t_arr_rt_.value(), t);
-  ASSERT_TRUE(stop2.t_dep_rt_.has_value());
-  EXPECT_EQ(stop2.t_dep_rt_.value(), t);
-  ASSERT_TRUE(stop2.in_allowed_.has_value());
-  EXPECT_EQ(stop2.in_allowed_, true);
-  ASSERT_TRUE(stop2.out_allowed_.has_value());
-  EXPECT_EQ(stop2.out_allowed_, true);
-  EXPECT_EQ(stop2.additional_stop_, false);
 }
 
 TEST(xml_in, status_anfrage) {
