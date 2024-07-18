@@ -12,6 +12,7 @@
 
 namespace vdv {
 
+namespace http = boost::beast::http;
 using namespace net;
 using namespace net::http::client;
 
@@ -29,12 +30,6 @@ std::string get_endpoint_path(std::string_view server_name,
   ss << "/" << server_name << "/" << request;
   return ss.str();
 }
-
-web_server::string_res_t xml_response(
-    web_server::http_req_t const& req,
-    std::string_view text,
-    boost::beast::http::status status = boost::beast::http::status::ok,
-    std::string_view content_type = "text/xml");
 
 std::ostream& operator<<(std::ostream& out, net::route_request const& rr) {
   out << rr.body() << "\n";
@@ -113,10 +108,11 @@ void vdv_client::run() {
                      net::web_server::http_res_cb_t res_cb, bool) {
                    auto const msg_in = parse(req.body());
                    if (holds_alternative<client_status_anfrage_msg>(msg_in)) {
-                     res_cb(xml_response(
+                     res_cb(string_response(
                          req,
                          client_status_antwort_xml_str(
-                             std::chrono::system_clock::now(), true, start_)));
+                             std::chrono::system_clock::now(), true, start_),
+                         http::status::ok, "text/xml"));
                      std::cout << "Received request on client status endpoint, "
                                   "response: OK\n";
                    } else {
@@ -131,9 +127,11 @@ void vdv_client::run() {
                         net::web_server::http_res_cb_t res_cb, bool) {
                    auto const msg_in = parse(req.body());
                    if (holds_alternative<daten_bereit_anfrage_msg>(msg_in)) {
-                     res_cb(xml_response(
-                         req, daten_bereit_antwort_xml_str(
-                                  std::chrono::system_clock::now(), true, 0)));
+                     res_cb(string_response(
+                         req,
+                         daten_bereit_antwort_xml_str(
+                             std::chrono::system_clock::now(), true, 0),
+                         http::status::ok, "text/xml"));
                      std::cout << "Received request on data ready endpoint, "
                                   "fetching...\n";
                      fetch();
@@ -154,7 +152,7 @@ void vdv_client::run() {
     std::cerr << "error: " << ec << "\n";
     return;
   }
-  std::cout << "listening on 0.0.0.0: << " << client_port_ << "\n";
+  std::cout << "listening on 0.0.0.0:" << client_port_ << "\n";
 
   net::run(ioc_)();
 }
