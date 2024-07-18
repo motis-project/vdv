@@ -2,7 +2,6 @@
 
 #include "net/http/client/url.h"
 
-#include "vdv/subscription.h"
 #include "vdv/types.h"
 
 #include <variant>
@@ -71,7 +70,6 @@ struct client_status_antwort_msg {
   timestamp_t t_;
   bool success_;
   timestamp_t start_;
-  std::vector<vdv::subscription> subscriptions_;
 };
 
 using vdv_msg = std::variant<abo_anfrage_msg,

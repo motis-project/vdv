@@ -191,8 +191,7 @@ client_status_antwort_msg parse_client_status_antwort(
       .start_ =
           parse_timestamp(get_req(doc, "ClientStatusAntwort/StartDienstZst")
                               .node()
-                              .child_value()),
-      .subscriptions_ = std::vector<subscription>{}};
+                              .child_value())};
 }
 
 vdv_msg parse(std::string const& str) {

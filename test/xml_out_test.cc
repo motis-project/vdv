@@ -1,6 +1,6 @@
 #include "gtest/gtest.h"
 
-#include "vdv/timestamp.h"
+#include "vdv/types.h"
 #include "vdv/xml_out.h"
 
 #include <chrono>

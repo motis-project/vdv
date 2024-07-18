@@ -132,5 +132,4 @@ TEST(xml_in, client_status_antwort) {
   EXPECT_EQ(client_status_antwort_actual.t_, t);
   EXPECT_EQ(client_status_antwort_actual.success_, true);
   EXPECT_EQ(client_status_antwort_actual.start_, t);
-  EXPECT_TRUE(client_status_antwort_actual.subscriptions_.empty());
 }

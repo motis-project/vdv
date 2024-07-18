@@ -1,6 +1,5 @@
 #include "vdv/xml_out.h"
 #include <vector>
-#include "vdv/timestamp.h"
 #include "vdv/types.h"
 
 namespace vdv {
