@@ -28,7 +28,7 @@ TEST(xml_in, abo_anfrage) {
   EXPECT_EQ(abo_anfrage_actual.abo_id_, 1);
   EXPECT_EQ(abo_anfrage_actual.t_, t);
   EXPECT_EQ(abo_anfrage_actual.expiration_t_,
-            parse_timestamp("2024-06-22T13:37:23"));
+            parse_sys_time("2024-06-22T13:37:23"));
   EXPECT_EQ(abo_anfrage_actual.hysteresis_, 30s);
   EXPECT_EQ(abo_anfrage_actual.look_ahead_, 1440min);
 }

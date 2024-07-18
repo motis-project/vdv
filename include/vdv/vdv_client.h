@@ -1,5 +1,7 @@
 #pragma once
 
+#include <forward_list>
+#include <mutex>
 #include <string>
 #include <vector>
 
@@ -19,24 +21,36 @@ namespace vdv {
 
 struct vdv_client {
 
+  struct subscription {
+    bool is_stale() const { return end_ < std::chrono::system_clock::now(); }
+
+    std::uint64_t id_;
+    sys_time start_;
+    sys_time end_;
+    std::chrono::seconds hysteresis_;
+    std::chrono::minutes look_ahead_;
+  };
+
   vdv_client(std::string_view client_name,
              std::string_view client_port,
              std::string_view server_name,
              net::http::client::url const& server_addr,
-             std::chrono::seconds hysteresis,
-             std::chrono::minutes look_ahead,
              nigiri::timetable const*,
              nigiri::rt_timetable*,
              nigiri::source_idx_t);
 
   void run();
 
-  void fetch();
+  void subscribe(sys_time start,
+                 sys_time end,
+                 std::chrono::seconds hysteresis,
+                 std::chrono::minutes look_ahead);
 
-  bool is_sub_valid() const {
-    auto const now = std::chrono::system_clock::now();
-    return start_ <= now && now <= start_ + look_ahead_;
-  }
+  void clean_up_subs();
+
+  void fetch() const;
+
+  void check_server_status();
 
   std::string client_name_;
   std::string client_port_;
@@ -49,9 +63,11 @@ struct vdv_client {
   std::string client_status_path_;
   std::string data_ready_path_;
 
-  std::chrono::time_point<std::chrono::system_clock> start_;
-  std::chrono::minutes look_ahead_;
-  std::chrono::seconds hysteresis_;
+  sys_time start_;
+
+  std::uint8_t next_id_{0U};
+  std::forward_list<subscription> subs_{};
+  std::mutex subs_mutex_;
 
   nigiri::timetable const* tt_;
   nigiri::rt_timetable* rtt_;

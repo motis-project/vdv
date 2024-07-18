@@ -1,6 +1,6 @@
 #pragma once
 
-auto const t = vdv::parse_timestamp("2024-06-21T13:37:23");
+auto const t = vdv::parse_sys_time("2024-06-21T13:37:23");
 
 constexpr auto const empty_xml_str = R"(
 <?xml version="1.0" encoding="iso-8859-1"?>

@@ -14,12 +14,12 @@ pugi::xml_document make_xml_doc() {
 
 void add_sender_zst_attr(pugi::xml_node& node,
                          std::string const& sender,
-                         timestamp_t const t) {
+                         sys_time const t) {
   node.append_attribute("Sender") = sender.c_str();
   node.append_attribute("Zst") = to_string(t).c_str();
 }
 
-void add_start_dienst_zst_node(pugi::xml_node& node, timestamp_t const start) {
+void add_start_dienst_zst_node(pugi::xml_node& node, sys_time const start) {
   auto start_dienst_zst_node = node.append_child("StartDienstZst");
   start_dienst_zst_node.append_child(pugi::node_pcdata)
       .set_value(to_string(start).c_str());
@@ -27,7 +27,7 @@ void add_start_dienst_zst_node(pugi::xml_node& node, timestamp_t const start) {
 
 pugi::xml_node add_abo_anfrage_node(pugi::xml_node& node,
                                     std::string const& sender,
-                                    timestamp_t const t) {
+                                    sys_time const t) {
   auto abo_anfrage_node = node.append_child("AboAnfrage");
   add_sender_zst_attr(abo_anfrage_node, sender, t);
   return abo_anfrage_node;
@@ -40,7 +40,7 @@ void add_abo_loeschen_node(pugi::xml_node& node, std::uint32_t const abo_id) {
 }
 
 void add_bestaetigung_node(pugi::xml_node& node,
-                           timestamp_t const t,
+                           sys_time const t,
                            bool const success,
                            std::uint32_t const error_code) {
   auto bestaetigung_node = node.append_child("Bestaetigung");
@@ -51,7 +51,7 @@ void add_bestaetigung_node(pugi::xml_node& node,
 }
 
 void add_status_node(pugi::xml_node& node,
-                     timestamp_t const t,
+                     sys_time const t,
                      bool const success) {
   auto status_node = node.append_child("Status");
   status_node.append_attribute("Zst") = to_string(t).c_str();
@@ -65,16 +65,16 @@ std::string xml_to_str(pugi::xml_document const& doc) {
 }
 
 std::string abo_anfrage_xml_str(std::string const& sender,
-                                timestamp_t const t,
+                                sys_time const start,
+                                sys_time const end,
                                 std::uint64_t const abo_id,
                                 std::chrono::seconds const hysteresis,
                                 std::chrono::minutes const look_ahead) {
   auto doc = make_xml_doc();
-  auto abo_anfrage_node = add_abo_anfrage_node(doc, sender, t);
+  auto abo_anfrage_node = add_abo_anfrage_node(doc, sender, start);
   auto abo_aus_node = abo_anfrage_node.append_child("AboAUS");
   abo_aus_node.append_attribute("AboID") = std::to_string(abo_id).c_str();
-  abo_aus_node.append_attribute("VerfallZst") =
-      to_string(t + look_ahead).c_str();
+  abo_aus_node.append_attribute("VerfallZst") = to_string(end).c_str();
   auto hysterese_node = abo_aus_node.append_child("Hysterese");
   hysterese_node.append_child(pugi::node_pcdata)
       .set_value(std::to_string(hysteresis.count()).c_str());
@@ -84,7 +84,7 @@ std::string abo_anfrage_xml_str(std::string const& sender,
   return xml_to_str(doc);
 }
 
-std::string abo_antwort_xml_str(timestamp_t const t,
+std::string abo_antwort_xml_str(sys_time const t,
                                 bool const success,
                                 std::uint32_t const error_code) {
   auto doc = make_xml_doc();
@@ -94,7 +94,7 @@ std::string abo_antwort_xml_str(timestamp_t const t,
 }
 
 std::string daten_bereit_anfrage_xml_str(std::string const& sender,
-                                         timestamp_t const t) {
+                                         sys_time const t) {
   auto doc = make_xml_doc();
   auto daten_bereit_anfrage_node = doc.append_child("DatenBereitAnfrage");
   daten_bereit_anfrage_node.append_attribute("Sender") = sender.c_str();
@@ -102,7 +102,7 @@ std::string daten_bereit_anfrage_xml_str(std::string const& sender,
   return xml_to_str(doc);
 }
 
-std::string daten_bereit_antwort_xml_str(timestamp_t const t,
+std::string daten_bereit_antwort_xml_str(sys_time const t,
                                          bool const success,
                                          std::uint32_t const error_code) {
   auto doc = make_xml_doc();
@@ -112,7 +112,7 @@ std::string daten_bereit_antwort_xml_str(timestamp_t const t,
 }
 
 std::string daten_abrufen_anfrage_xml_str(std::string const& sender,
-                                          timestamp_t const t,
+                                          sys_time const t,
                                           bool const all_datasets) {
   auto doc = make_xml_doc();
   auto daten_abrufen_anfrage_node = doc.append_child("DatenAbrufenAnfrage");
@@ -127,17 +127,17 @@ std::string daten_abrufen_anfrage_xml_str(std::string const& sender,
 }
 
 std::string status_anfrage_xml_str(std::string const& sender,
-                                   timestamp_t const t) {
+                                   sys_time const t) {
   auto doc = make_xml_doc();
   auto status_anfrage_node = doc.append_child("StatusAnfrage");
   add_sender_zst_attr(status_anfrage_node, sender, t);
   return xml_to_str(doc);
 }
 
-std::string status_antwort_xml_str(timestamp_t const t,
+std::string status_antwort_xml_str(sys_time const t,
                                    bool const success,
                                    bool const data_rdy,
-                                   timestamp_t const start) {
+                                   sys_time const start) {
   auto doc = make_xml_doc();
   auto status_antwort_node = doc.append_child("StatusAntwort");
   add_status_node(status_antwort_node, t, success);
@@ -149,7 +149,7 @@ std::string status_antwort_xml_str(timestamp_t const t,
 }
 
 std::string client_status_anfrage_xml_str(std::string const& sender,
-                                          timestamp_t const t,
+                                          sys_time const t,
                                           bool const req_active_abos) {
   auto doc = make_xml_doc();
   auto client_status_anfrage_node = doc.append_child("ClientStatusAnfrage");
@@ -160,9 +160,9 @@ std::string client_status_anfrage_xml_str(std::string const& sender,
   return xml_to_str(doc);
 }
 
-std::string client_status_antwort_xml_str(timestamp_t const t,
+std::string client_status_antwort_xml_str(sys_time const t,
                                           bool const success,
-                                          timestamp_t const start) {
+                                          sys_time const start) {
   auto doc = make_xml_doc();
   auto client_status_antwort_node = doc.append_child("ClientStatusAntwort");
   add_status_node(client_status_antwort_node, t, success);

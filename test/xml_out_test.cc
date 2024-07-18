@@ -17,8 +17,8 @@ std::string result_str(std::string const& str) {
 }
 
 TEST(xml_out, abo_anfrage) {
-  EXPECT_EQ(abo_anfrage_str,
-            result_str(abo_anfrage_xml_str("motis", t, 1, 30s, 1440min)));
+  EXPECT_EQ(abo_anfrage_str, result_str(abo_anfrage_xml_str("motis", t, t + 24h,
+                                                            1, 30s, 1440min)));
 }
 
 TEST(xml_out, abo_antwort) {

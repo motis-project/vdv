@@ -21,10 +21,10 @@ std::optional<std::string> get_opt_str(pugi::xml_node const& node,
   return xpath ? std::optional{xpath.node().child_value()} : std::nullopt;
 }
 
-std::optional<timestamp_t> get_opt_timestamp(pugi::xml_node const& node,
-                                             std::string const& str) {
+std::optional<sys_time> get_opt_timestamp(pugi::xml_node const& node,
+                                          std::string const& str) {
   auto const xpath = get_opt(node, str);
-  return xpath ? std::optional{parse_timestamp(xpath.node().child_value())}
+  return xpath ? std::optional{parse_sys_time(xpath.node().child_value())}
                : std::nullopt;
 }
 
@@ -72,11 +72,10 @@ date::sys_days parse_date(std::string const& str) {
 
 abo_anfrage_msg parse_abo_anfrage(pugi::xml_document const& doc) {
   return {
-      .t_ =
-          parse_timestamp(get_req(doc, "AboAnfrage/@Zst").attribute().value()),
+      .t_ = parse_sys_time(get_req(doc, "AboAnfrage/@Zst").attribute().value()),
       .sender_ = get_req(doc, "AboAnfrage/@Sender").attribute().value(),
       .abo_id_ = get_req(doc, "AboAnfrage/AboAUS/@AboID").attribute().as_uint(),
-      .expiration_t_ = parse_timestamp(
+      .expiration_t_ = parse_sys_time(
           get_req(doc, "AboAnfrage/AboAUS/@VerfallZst").attribute().value()),
       .hysteresis_ = std::chrono::seconds{std::stol(
           get_req(doc, "AboAnfrage/AboAUS/Hysterese").node().child_value())},
@@ -87,7 +86,7 @@ abo_anfrage_msg parse_abo_anfrage(pugi::xml_document const& doc) {
 }
 
 abo_antwort_msg parse_abo_antwort(pugi::xml_document const& doc) {
-  return {.t_ = parse_timestamp(
+  return {.t_ = parse_sys_time(
               get_req(doc, "AboAntwort/Bestaetigung/@Zst").attribute().value()),
           .success_ =
               std::string_view{get_req(doc, "AboAntwort/Bestaetigung/@Ergebnis")
@@ -100,7 +99,7 @@ abo_antwort_msg parse_abo_antwort(pugi::xml_document const& doc) {
 
 daten_bereit_anfrage_msg parse_daten_bereit_anfrage(
     pugi::xml_document const& doc) {
-  return {.t_ = parse_timestamp(
+  return {.t_ = parse_sys_time(
               get_req(doc, "DatenBereitAnfrage/@Zst").attribute().value()),
           .sender_ =
               get_req(doc, "DatenBereitAnfrage/@Sender").attribute().value()};
@@ -109,9 +108,9 @@ daten_bereit_anfrage_msg parse_daten_bereit_anfrage(
 daten_bereit_antwort_msg parse_daten_bereit_antwort(
     pugi::xml_document const& doc) {
   return {
-      .t_ = parse_timestamp(get_req(doc, "DatenBereitAntwort/Bestaetigung/@Zst")
-                                .attribute()
-                                .value()),
+      .t_ = parse_sys_time(get_req(doc, "DatenBereitAntwort/Bestaetigung/@Zst")
+                               .attribute()
+                               .value()),
       .success_ = parse_success(
           get_req(doc, "DatenBereitAntwort/Bestaetigung/@Ergebnis")
               .attribute()
@@ -124,7 +123,7 @@ daten_bereit_antwort_msg parse_daten_bereit_antwort(
 
 daten_abrufen_anfrage_msg parse_daten_abrufen_anfrage(
     pugi::xml_document const& doc) {
-  return {.t_ = parse_timestamp(
+  return {.t_ = parse_sys_time(
               get_req(doc, "DatenAbrufenAnfrage/@Zst").attribute().value()),
           .sender_ =
               get_req(doc, "DatenAbrufenAnfrage/@Sender").attribute().value(),
@@ -134,44 +133,44 @@ daten_abrufen_anfrage_msg parse_daten_abrufen_anfrage(
 
 daten_abrufen_antwort_msg parse_daten_abrufen_antwort(
     pugi::xml_document const& doc) {
-  return {.t_ = parse_timestamp(
-              get_req(doc, "DatenAbrufenAntwort/Bestaetigung/@Zst")
-                  .attribute()
-                  .value()),
-          .success_ = parse_success(
-              get_req(doc, "DatenAbrufenAntwort/Bestaetigung/@Ergebnis")
-                  .attribute()
-                  .value()),
-          .error_code_ =
-              get_req(doc, "DatenAbrufenAntwort/Bestaetigung/@Fehlernummer")
-                  .attribute()
-                  .as_uint(),
-          .abo_id_ = get_req(doc, "DatenAbrufenAntwort/AUSNachricht/@AboID")
-                         .attribute()
-                         .as_uint()};
+  return {
+      .t_ = parse_sys_time(get_req(doc, "DatenAbrufenAntwort/Bestaetigung/@Zst")
+                               .attribute()
+                               .value()),
+      .success_ = parse_success(
+          get_req(doc, "DatenAbrufenAntwort/Bestaetigung/@Ergebnis")
+              .attribute()
+              .value()),
+      .error_code_ =
+          get_req(doc, "DatenAbrufenAntwort/Bestaetigung/@Fehlernummer")
+              .attribute()
+              .as_uint(),
+      .abo_id_ = get_req(doc, "DatenAbrufenAntwort/AUSNachricht/@AboID")
+                     .attribute()
+                     .as_uint()};
 }
 
 status_anfrage_msg parse_status_anfrage(pugi::xml_document const& doc) {
-  return {.t_ = parse_timestamp(
+  return {.t_ = parse_sys_time(
               get_req(doc, "StatusAnfrage/@Zst").attribute().value()),
           .sender_ = get_req(doc, "StatusAnfrage/@Sender").attribute().value()};
 }
 
 status_antwort_msg parse_status_antwort(pugi::xml_document const& doc) {
   return {
-      .t_ = parse_timestamp(
+      .t_ = parse_sys_time(
           get_req(doc, "StatusAntwort/Status/@Zst").attribute().value()),
       .success_ = parse_success(
           get_req(doc, "StatusAntwort/Status/@Ergebnis").attribute().value()),
       .data_rdy_ =
           get_bool_with_fallback(doc, "StatusAntwort/DatenBereit", false),
-      .start_ = parse_timestamp(
+      .start_ = parse_sys_time(
           get_req(doc, "StatusAntwort/StartDienstZst").node().child_value())};
 }
 
 client_status_anfrage_msg parse_client_status_anfrage(
     pugi::xml_document const& doc) {
-  return {.t_ = parse_timestamp(
+  return {.t_ = parse_sys_time(
               get_req(doc, "ClientStatusAnfrage/@Zst").attribute().value()),
           .sender_ =
               get_req(doc, "ClientStatusAnfrage/@Sender").attribute().value(),
@@ -182,16 +181,16 @@ client_status_anfrage_msg parse_client_status_anfrage(
 client_status_antwort_msg parse_client_status_antwort(
     pugi::xml_document const& doc) {
   return {
-      .t_ = parse_timestamp(
+      .t_ = parse_sys_time(
           get_req(doc, "ClientStatusAntwort/Status/@Zst").attribute().value()),
       .success_ =
           parse_success(get_req(doc, "ClientStatusAntwort/Status/@Ergebnis")
                             .attribute()
                             .value()),
       .start_ =
-          parse_timestamp(get_req(doc, "ClientStatusAntwort/StartDienstZst")
-                              .node()
-                              .child_value())};
+          parse_sys_time(get_req(doc, "ClientStatusAntwort/StartDienstZst")
+                             .node()
+                             .child_value())};
 }
 
 vdv_msg parse(std::string const& str) {
