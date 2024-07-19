@@ -141,10 +141,9 @@ void vdv_client::run() {
     std::cerr << "error: " << ec << "\n";
     return;
   }
-  std::cout << "listening on 0.0.0.0:" << client_port_ << "\n";
+  std::cout << "listening on " << client_ip_ << ":" << client_port_ << "\n";
 
   ioc_.run();
-  std::cout << "run method ends\n";
 }
 
 void vdv_client::subscribe(sys_time start,
@@ -182,6 +181,11 @@ void vdv_client::subscribe(sys_time start,
       std::cout << "subscription failed, server replied:\n" << r;
     }
   });
+  std::cout << "Client subs are: ";
+  for (auto const& sub : subs_) {
+    std::cout << sub.id_ << " ";
+  }
+  std::cout << std::endl;
 }
 
 void vdv_client::clean_up_subs() {

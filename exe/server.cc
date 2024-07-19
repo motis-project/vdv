@@ -172,14 +172,16 @@ int main(int ac, char** av) {
   std::thread t(run, std::ref(ioc));
   t.detach();
 
-  auto ss = std::stringstream{};
-  ss << "http://" << client_ip << ":" << client_port << "/" << server_name
-     << "/aus/clientstatus.xml";
-  auto const client_status_addr = nhc::url{ss.str()};
-  ss.clear();
-  ss << "http://" << client_ip << ":" << client_port << "/" << server_name
-     << "/aus/datenbereit.xml";
-  auto const data_rdy_addr = nhc::url{ss.str()};
+  auto const client_endpoint = [](auto const& path) {
+    auto ss = std::stringstream{};
+    ss << "http://" << client_ip << ":" << client_port << "/" << server_name
+       << path;
+    return ss.str();
+  };
+
+  auto const client_status_addr =
+      nhc::url{client_endpoint("/aus/clientstatus.xml")};
+  auto const data_rdy_addr = nhc::url{client_endpoint("/aus/datenbereit.xml")};
 
   std::random_device dev;
   std::mt19937 rng(dev());
