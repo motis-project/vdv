@@ -1,6 +1,7 @@
 #pragma once
 
-auto const t = vdv::parse_sys_time("2024-06-21T13:37:23");
+auto const t = vdv::parse_timestamp("2024-06-21T13:37:23");
+auto const t_end = vdv::parse_timestamp("2100-06-21T13:37:23");
 
 constexpr auto const empty_xml_str = R"(
 <?xml version="1.0" encoding="iso-8859-1"?>
@@ -247,5 +248,9 @@ constexpr auto const client_status_antwort_str = R"(
 <ClientStatusAntwort>
   <Status Zst="2024-06-21T13:37:23" Ergebnis="ok" />
   <StartDienstZst>2024-06-21T13:37:23</StartDienstZst>
+  <AktiveAbos>
+    <AboAUS AboID="23" VerfallZst="2100-06-21T13:37:23" />
+    <AboAUS AboID="42" VerfallZst="2100-06-21T13:37:23" />
+  </AktiveAbos>
 </ClientStatusAntwort>
 )";

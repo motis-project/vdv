@@ -1,5 +1,6 @@
 #pragma once
 
+#include <forward_list>
 #include "pugixml.hpp"
 #include "vdv/types.h"
 
@@ -49,8 +50,10 @@ std::string client_status_anfrage_xml_str(std::string const& sender,
                                           sys_time,
                                           bool req_active_abos);
 
-std::string client_status_antwort_xml_str(sys_time,
-                                          bool success,
-                                          sys_time start);
+std::string client_status_antwort_xml_str(
+    sys_time,
+    bool success,
+    sys_time start,
+    std::forward_list<subscription> const* subs = nullptr);
 
 }  // namespace vdv

@@ -63,13 +63,14 @@ struct status_antwort_msg {
 struct client_status_anfrage_msg {
   sys_time t_;
   std::string sender_;
-  bool req_active_abos_{false};
+  bool query_active_subs_{false};
 };
 
 struct client_status_antwort_msg {
   sys_time t_;
   bool success_;
   sys_time start_;
+  std::vector<abo_id_t> active_subs_;
 };
 
 using vdv_msg = std::variant<abo_anfrage_msg,

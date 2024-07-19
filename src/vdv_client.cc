@@ -142,12 +142,15 @@ void vdv_client::run() {
   std::cout << "listening on 0.0.0.0:" << client_port_ << "\n";
 
   ioc_.run();
+  std::cout << "run method ends\n";
 }
 
 void vdv_client::subscribe(sys_time start,
                            sys_time end,
                            std::chrono::seconds hysteresis,
                            std::chrono::minutes look_ahead) {
+  clean_up_subs();
+
   std::cout << "sending subscription request to " << manage_sub_addr_
             << std::endl;
   auto const id = next_id_++;
@@ -203,7 +206,7 @@ void vdv_client::fetch() const {
   });
 }
 
-void vdv_client::check_server_status() {
+void vdv_client::check_server_status() const {
   std::cout << "sending status request to " << status_addr_ << "\n";
   auto req = nhc::request(
       status_addr_, nhc::request::method::POST, {{"Content-Type", "text/xml"}},

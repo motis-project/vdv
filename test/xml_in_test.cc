@@ -28,7 +28,7 @@ TEST(xml_in, abo_anfrage) {
   EXPECT_EQ(abo_anfrage_actual.abo_id_, 1);
   EXPECT_EQ(abo_anfrage_actual.t_, t);
   EXPECT_EQ(abo_anfrage_actual.expiration_t_,
-            parse_sys_time("2024-06-22T13:37:23"));
+            parse_timestamp("2024-06-22T13:37:23"));
   EXPECT_EQ(abo_anfrage_actual.hysteresis_, 30s);
   EXPECT_EQ(abo_anfrage_actual.look_ahead_, 1440min);
 }
@@ -121,7 +121,7 @@ TEST(xml_in, client_status_anfrage) {
   auto const client_status_anfrage_actual = get<client_status_anfrage_msg>(msg);
   EXPECT_EQ(client_status_anfrage_actual.sender_, "motis");
   EXPECT_EQ(client_status_anfrage_actual.t_, t);
-  EXPECT_EQ(client_status_anfrage_actual.req_active_abos_, true);
+  EXPECT_EQ(client_status_anfrage_actual.query_active_subs_, true);
 }
 
 TEST(xml_in, client_status_antwort) {
@@ -132,4 +132,13 @@ TEST(xml_in, client_status_antwort) {
   EXPECT_EQ(client_status_antwort_actual.t_, t);
   EXPECT_EQ(client_status_antwort_actual.success_, true);
   EXPECT_EQ(client_status_antwort_actual.start_, t);
+  EXPECT_EQ(client_status_antwort_actual.active_subs_.size(), 2);
+  EXPECT_TRUE(std::find(begin(client_status_antwort_actual.active_subs_),
+                        end(client_status_antwort_actual.active_subs_),
+                        abo_id_t{23}) !=
+              end(client_status_antwort_actual.active_subs_));
+  EXPECT_TRUE(std::find(begin(client_status_antwort_actual.active_subs_),
+                        end(client_status_antwort_actual.active_subs_),
+                        abo_id_t{42}) !=
+              end(client_status_antwort_actual.active_subs_));
 }

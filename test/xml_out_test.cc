@@ -60,6 +60,9 @@ TEST(xml_out, client_status_anfrage) {
 }
 
 TEST(xml_out, client_status_antwort) {
+  std::forward_list<subscription> subs;
+  subs.emplace_front(42, t, t_end, 30s, 1440min);
+  subs.emplace_front(23, t, t_end, 30s, 1440min);
   EXPECT_EQ(client_status_antwort_str,
-            result_str(client_status_antwort_xml_str(t, true, t)));
+            result_str(client_status_antwort_xml_str(t, true, t, &subs)));
 }

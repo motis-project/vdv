@@ -21,16 +21,6 @@ namespace vdv {
 
 struct vdv_client {
 
-  struct subscription {
-    bool is_stale() const { return end_ < std::chrono::system_clock::now(); }
-
-    std::uint64_t id_;
-    sys_time start_;
-    sys_time end_;
-    std::chrono::seconds hysteresis_;
-    std::chrono::minutes look_ahead_;
-  };
-
   vdv_client(std::string_view client_name,
              std::string_view client_port,
              std::string_view server_name,
@@ -50,7 +40,7 @@ struct vdv_client {
 
   void fetch() const;
 
-  void check_server_status();
+  void check_server_status() const;
 
   std::string client_name_;
   std::string client_port_;
@@ -65,7 +55,7 @@ struct vdv_client {
 
   sys_time start_;
 
-  std::uint8_t next_id_{0U};
+  abo_id_t next_id_{0U};
   std::forward_list<subscription> subs_{};
   std::mutex subs_mutex_;
 
