@@ -152,8 +152,9 @@ void vdv_client::subscribe(sys_time start,
                            std::chrono::minutes look_ahead) {
   clean_up_subs();
 
-  std::cout << "sending subscription request to " << manage_sub_addr_ << ":";
   auto const id = next_id_++;
+  std::cout << "sending subscription request (id:" << id << ") to "
+            << manage_sub_addr_ << ": ";
   auto req = nhc::request(manage_sub_addr_, nhc::request::method::POST,
                           {{"Content-Type", "text/xml"}},
                           abo_anfrage_xml_str(client_name_, start, end, id,
@@ -168,6 +169,9 @@ void vdv_client::subscribe(sys_time start,
             get<abo_antwort_msg>(msg_in).success_) {
           std::cout << "successfully subscribed\n" << std::endl;
           auto const lock = std::scoped_lock{subs_mutex_};
+          // TODO fix dangling reference of id
+          std::cout << "adding subscription with id: " << id << " to subs_"
+                    << std::endl;
           subs_.emplace_front(id, start, end, hysteresis, look_ahead);
         } else {
           std::cout << "invalid response body to subscription request:\n"
