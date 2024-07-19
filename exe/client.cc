@@ -1,3 +1,4 @@
+#include <random>
 #include <thread>
 
 #include "net/http/client/http_client.h"
@@ -16,7 +17,7 @@ int main() {
   auto client = vdv_client{"client",
                            "8080",
                            "server",
-                           url{"http://0.0.0.0:80"},
+                           url{"http://192.168.2.206:80"},
                            nullptr,
                            nullptr,
                            nigiri::source_idx_t{0}};
@@ -24,10 +25,19 @@ int main() {
   std::thread t(&vdv_client::run, &client);
   t.detach();
 
-  while (true) {
+  std::random_device dev;
+  std::mt19937 rng(dev());
+  std::uniform_int_distribution<std::mt19937::result_type> dist(5, 15);
+
+  for (auto i = 0U; i != 1000; ++i) {
     client.check_server_status();
 
-    std::this_thread::sleep_for(1s);
+    std::this_thread::sleep_for(std::chrono::seconds{dist(rng)});
+
+    client.subscribe(std::chrono::system_clock::now(),
+                     std::chrono::system_clock::now() + 5min, 30s, 60min);
+
+    std::this_thread::sleep_for(std::chrono::seconds{dist(rng)});
 
     //    client.subscribe(std::chrono::system_clock::now(),
     //                     std::chrono::system_clock::now() + 5min, 30s, 60min);

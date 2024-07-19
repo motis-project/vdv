@@ -126,6 +126,19 @@ std::string daten_abrufen_anfrage_xml_str(std::string const& sender,
   return xml_to_str(doc);
 }
 
+// mock
+std::string daten_abrufen_antwort_xml_str(sys_time const t,
+                                          bool const success,
+                                          std::uint32_t const error_code) {
+  auto doc = make_xml_doc();
+  auto daten_bereit_antwort_node = doc.append_child("DatenAbrufenAntwort");
+  add_bestaetigung_node(daten_bereit_antwort_node, t, success, error_code);
+  auto aus_nachricht_node =
+      daten_bereit_antwort_node.append_child("AUSNachricht");
+  aus_nachricht_node.append_attribute("AboID") = "1";
+  return xml_to_str(doc);
+}
+
 std::string status_anfrage_xml_str(std::string const& sender,
                                    sys_time const t) {
   auto doc = make_xml_doc();

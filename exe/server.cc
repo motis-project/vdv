@@ -1,3 +1,7 @@
+#include <thread>
+
+#include "net/http/client/http_client.h"
+#include "net/http/client/url.h"
 #include "net/run.h"
 #include "net/web_server/query_router.h"
 #include "net/web_server/responses.h"
@@ -11,21 +15,18 @@ namespace http = boost::beast::http;
 using net::web_server;
 using namespace std::string_literals;
 using namespace vdv;
+namespace nhc = net::http::client;
 
-constexpr auto const response =
-    R"(<?xml version="1.0" encoding="ISO-8859-1"?>
-<DatenBereitAntwort>
-  <Bestaetigung Zst="2024-06-05T20:56:54Z" Ergebnis="ok" Fehlernummer="0" />
-</DatenBereitAntwort>)";
+constexpr auto const server_name = "server";
+constexpr auto const server_ip = "0.0.0.0";
+constexpr auto const server_port = "80";
+constexpr auto const client_ip = "0.0.0.0";
+constexpr auto const client_port = "8080";
 
-int main(int ac, char** av) {
-
-  auto const server_ip = "0.0.0.0";
-  auto server_port = "80";
+void run(asio::io_context& ioc) {
 
   auto const start = std::chrono::system_clock::now();
 
-  auto ioc = asio::io_context{};
   auto s = net::web_server{ioc};
   auto qr =
       net::query_router{}
@@ -57,7 +58,24 @@ int main(int ac, char** av) {
                          abo_antwort_xml_str(std::chrono::system_clock::now(),
                                              true, 0),
                          http::status::ok, "text/xml"));
-                     std::cout << "Received request on aboverwalten endpoint, "
+                     std::cout << "Received request on manage subs endpoint, "
+                                  "response: OK"
+                               << std::endl;
+                   } else {
+                     res_cb(bad_request_response(req));
+                   }
+                 })
+          .route("POST", "/client/aus/datenabrufen.xml",
+                 [&](net::route_request const& req,
+                     web_server::http_res_cb_t const& res_cb, bool) {
+                   auto const msg_in = parse(req.body());
+                   if (holds_alternative<daten_abrufen_anfrage_msg>(msg_in)) {
+                     res_cb(string_response(
+                         req,
+                         daten_abrufen_antwort_xml_str(
+                             std::chrono::system_clock::now(), true, 0),
+                         http::status::ok, "text/xml"));
+                     std::cout << "Received request on data request endpoint, "
                                   "response: OK"
                                << std::endl;
                    } else {
@@ -85,10 +103,80 @@ int main(int ac, char** av) {
   s.run();
   if (ec) {
     std::cerr << "error: " << ec << "\n";
-    return 1;
+    return;
   }
 
   std::cout << "listening on " << server_ip << ":" << server_port << "\n";
   // ioc.run();
   net::run(ioc)();
+}
+
+void check_client_status(asio::io_context& ioc,
+                         nhc::url const& client_status_addr) {
+  std::cout << "sending client status request to " << client_status_addr
+            << "\n";
+  auto req =
+      nhc::request(client_status_addr, nhc::request::method::POST,
+                   {{"Content-Type", "text/xml"}},
+                   client_status_anfrage_xml_str(
+                       server_name, std::chrono::system_clock::now(), true));
+  auto const client = make_http(ioc, client_status_addr);
+  client->query(req, [&]([[maybe_unused]] auto&& shrd_ptr, auto&& r,
+                         [[maybe_unused]] auto&& ec) {
+    if (r.status_code == 200) {
+      try {
+        auto const msg_in = parse(r.body);
+        if (holds_alternative<client_status_antwort_msg>(msg_in)) {
+          std::cout << "client reports active subs: ";
+          for (auto const id :
+               get<client_status_antwort_msg>(msg_in).active_subs_) {
+            std::cout << id << " ";
+          }
+          std::cout << std::endl;
+        }
+      } catch (std::runtime_error const& e) {
+        std::cout << "error parsing xml response\n";
+      }
+    }
+  });
+}
+
+void report_data_rdy(asio::io_context& ioc, nhc::url const& data_rdy_addr) {
+  std::cout << "reporting data rdy to " << data_rdy_addr << "\n";
+  auto req = nhc::request(data_rdy_addr, nhc::request::method::POST,
+                          {{"Content-Type", "text/xml"}},
+                          daten_bereit_anfrage_xml_str(
+                              server_name, std::chrono::system_clock::now()));
+  auto const client = make_http(ioc, data_rdy_addr);
+  client->query(req, [&]([[maybe_unused]] auto&& shrd_ptr, auto&& r,
+                         [[maybe_unused]] auto&& ec) {
+    if (r.status_code == 200) {
+      try {
+        auto const msg_in = parse(r.body);
+        if (holds_alternative<daten_bereit_antwort_msg>(msg_in) &&
+            get<daten_bereit_antwort_msg>(msg_in).success_) {
+          std::cout << "client copies" << std::endl;
+        }
+      } catch (std::runtime_error const& e) {
+        std::cout << "error parsing xml response\n";
+      }
+    }
+  });
+}
+
+int main(int ac, char** av) {
+
+  auto ioc = asio::io_context{};
+
+  std::thread t(run, std::ref(ioc));
+  t.detach();
+
+  auto ss = std::stringstream{};
+  ss << "http://" << client_ip << ":" << client_port << "/" << server_name
+     << "/aus/" << "/clientstatus.xml";
+  auto const client_status_addr = nhc::url{ss.str()};
+  ss.clear();
+  ss << "http://" << client_ip << ":" << client_port << "/" << server_name
+     << "/aus/" << "/datenbereit.xml";
+  auto const data_rdy_addr = nhc::url{ss.str()};
 }

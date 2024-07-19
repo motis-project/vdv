@@ -38,9 +38,9 @@ struct vdv_client {
 
   void clean_up_subs();
 
-  void fetch() const;
+  void fetch();
 
-  void check_server_status() const;
+  void check_server_status();
 
   std::string client_name_;
   std::string client_port_;
@@ -56,7 +56,7 @@ struct vdv_client {
   sys_time start_;
 
   abo_id_t next_id_{0U};
-  std::forward_list<subscription> subs_{};
+  std::forward_list<subscription> subs_;
   std::mutex subs_mutex_;
 
   nigiri::timetable const* tt_;

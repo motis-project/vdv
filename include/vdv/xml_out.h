@@ -37,7 +37,10 @@ std::string daten_abrufen_anfrage_xml_str(std::string const& sender,
                                           sys_time,
                                           bool all_datasets);
 
-// daten_abrufen_antwort_xml_str
+// mock
+std::string daten_abrufen_antwort_xml_str(sys_time,
+                                          bool success,
+                                          std::uint32_t error_code);
 
 std::string status_anfrage_xml_str(std::string const& sender, sys_time);
 

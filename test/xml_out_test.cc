@@ -45,6 +45,11 @@ TEST(xml_out, daten_abrufen_anfrage) {
             result_str(daten_abrufen_anfrage_xml_str("motis", t, false)));
 }
 
+TEST(xml_out, daten_abrufen_antwort) {
+  EXPECT_EQ(daten_abrufen_antwort_str,
+            result_str(daten_abrufen_antwort_xml_str(t, true, 0)));
+}
+
 TEST(xml_out, status_anfrage) {
   EXPECT_EQ(status_anfrage_str, result_str(status_anfrage_xml_str("motis", t)));
 }
