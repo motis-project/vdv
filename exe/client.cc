@@ -15,6 +15,7 @@ using namespace vdv;
 int main() {
 
   auto client = vdv_client{"client",
+                           "192.168.2.220",
                            "8080",
                            "server",
                            url{"http://192.168.2.206:80"},

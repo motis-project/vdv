@@ -46,6 +46,7 @@ std::ostream& operator<<(std::ostream& out, nhc::response const& r) {
 }
 
 vdv_client::vdv_client(std::string_view client_name,
+                       std::string_view client_ip,
                        std::string_view client_port,
                        std::string_view server_name,
                        nhc::url const& server_addr,
@@ -53,6 +54,7 @@ vdv_client::vdv_client(std::string_view client_name,
                        nigiri::rt_timetable* rtt,
                        nigiri::source_idx_t const src_idx)
     : client_name_{client_name},
+      client_ip_{client_ip},
       client_port_{client_port},
       server_name_{server_name},
       server_addr_{server_addr},
@@ -133,7 +135,7 @@ void vdv_client::run() {
   s.on_http_request(std::move(qr));
 
   auto ec = boost::system::error_code{};
-  s.init("0.0.0.0", client_port_, ec);
+  s.init(client_ip_, client_port_, ec);
   s.run();
   if (ec) {
     std::cerr << "error: " << ec << "\n";

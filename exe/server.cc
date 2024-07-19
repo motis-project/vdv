@@ -19,9 +19,9 @@ using namespace vdv;
 namespace nhc = net::http::client;
 
 constexpr auto const server_name = "server";
-constexpr auto const server_ip = "0.0.0.0";
+constexpr auto const server_ip = "192.168.2.206";
 constexpr auto const server_port = "80";
-constexpr auto const client_ip = "0.0.0.0";
+constexpr auto const client_ip = "192.168.2.220";
 constexpr auto const client_port = "8080";
 
 void run(asio::io_context& ioc) {
@@ -174,11 +174,11 @@ int main(int ac, char** av) {
 
   auto ss = std::stringstream{};
   ss << "http://" << client_ip << ":" << client_port << "/" << server_name
-     << "/aus/" << "/clientstatus.xml";
+     << "/aus/clientstatus.xml";
   auto const client_status_addr = nhc::url{ss.str()};
   ss.clear();
   ss << "http://" << client_ip << ":" << client_port << "/" << server_name
-     << "/aus/" << "/datenbereit.xml";
+     << "/aus/datenbereit.xml";
   auto const data_rdy_addr = nhc::url{ss.str()};
 
   std::random_device dev;

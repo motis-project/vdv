@@ -22,6 +22,7 @@ namespace vdv {
 struct vdv_client {
 
   vdv_client(std::string_view client_name,
+             std::string_view client_ip,
              std::string_view client_port,
              std::string_view server_name,
              net::http::client::url const& server_addr,
@@ -43,6 +44,7 @@ struct vdv_client {
   void check_server_status();
 
   std::string client_name_;
+  std::string client_ip_;
   std::string client_port_;
   std::string server_name_;
   net::http::client::url server_addr_;
