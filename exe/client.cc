@@ -30,23 +30,13 @@ int main() {
   std::uniform_int_distribution<std::mt19937::result_type> dist(5, 15);
 
   for (auto i = 0U; i != 1000; ++i) {
+    std::this_thread::sleep_for(std::chrono::seconds{dist(rng)});
+
     client.check_server_status();
 
     std::this_thread::sleep_for(std::chrono::seconds{dist(rng)});
 
     client.subscribe(std::chrono::system_clock::now(),
                      std::chrono::system_clock::now() + 5min, 30s, 60min);
-
-    std::this_thread::sleep_for(std::chrono::seconds{dist(rng)});
-
-    //    client.subscribe(std::chrono::system_clock::now(),
-    //                     std::chrono::system_clock::now() + 5min, 30s, 60min);
-    //    std::this_thread::sleep_for(10s);
-    //    std::cout << "active subs: ";
-    //    auto i = 0;
-    //    for (auto const& sub : client.subs_) {
-    //      std::cout << i++ << " ";
-    //    }
-    //    std::cout << "\n" << std::endl;
   }
 }

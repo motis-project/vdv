@@ -1,3 +1,4 @@
+#include <random>
 #include <thread>
 
 #include "net/http/client/http_client.h"
@@ -179,4 +180,18 @@ int main(int ac, char** av) {
   ss << "http://" << client_ip << ":" << client_port << "/" << server_name
      << "/aus/" << "/datenbereit.xml";
   auto const data_rdy_addr = nhc::url{ss.str()};
+
+  std::random_device dev;
+  std::mt19937 rng(dev());
+  std::uniform_int_distribution<std::mt19937::result_type> dist(5, 15);
+
+  for (auto i = 0U; i != 1000; ++i) {
+    std::this_thread::sleep_for(std::chrono::seconds{dist(rng)});
+
+    check_client_status(ioc, client_status_addr);
+
+    std::this_thread::sleep_for(std::chrono::seconds{dist(rng)});
+
+    report_data_rdy(ioc, data_rdy_addr);
+  }
 }
