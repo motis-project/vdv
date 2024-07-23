@@ -8,6 +8,7 @@
 #include "net/http/client/http_client.h"
 #include "net/http/client/url.h"
 
+#include "nigiri/rt/vdv/vdv_update.h"
 #include "nigiri/types.h"
 
 #include "vdv/types.h"
@@ -62,6 +63,7 @@ struct vdv_client {
   nigiri::timetable const* tt_;
   nigiri::rt_timetable* rtt_;
   nigiri::source_idx_t src_idx_;
+  std::vector<nigiri::rt::vdv::statistics> stats_;
 };
 
 }  // namespace vdv

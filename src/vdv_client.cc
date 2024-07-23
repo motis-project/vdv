@@ -232,7 +232,8 @@ void vdv_client::fetch() {
           doc.load_string(r.body.c_str());
           if (doc.select_node("DatenAbrufenAntwort/AUSNachricht")) {
             std::cout << "successfully fetched data\n";
-            // nigiri::rt::vdv::vdv_update(*tt_, *rtt_, src_idx_, doc);
+            stats_.emplace_back(
+                nigiri::rt::vdv::vdv_update(*tt_, *rtt_, src_idx_, doc));
           }
         } else {
           std::cout << "data fetch failed, server replied:\n" << r;

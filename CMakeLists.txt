@@ -66,7 +66,7 @@ target_compile_options(vdv PRIVATE ${vdv-compile-options})
 # --- CLIENT ---
 add_executable(vdv-client exe/client.cc)
 target_compile_features(vdv-client PUBLIC cxx_std_23)
-target_link_libraries(vdv-client vdv boost-program_options web-server http-client)
+target_link_libraries(vdv-client vdv date nigiri boost-program_options web-server http-client)
 
 
 # --- SERVER ---

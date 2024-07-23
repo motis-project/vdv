@@ -5,7 +5,7 @@
 [utl]
   url=git@github.com:motis-project/utl.git
   branch=master
-  commit=930d194f32a5da6c7d00e69bc53090548611c735
+  commit=b6f0f7a81675f420651ebed50a9c68b517ca79bc
 [date]
   url=git@github.com:motis-project/date.git
   branch=master
@@ -17,11 +17,11 @@
 [nigiri]
   url=git@github.com:mority/nigiri.git
   branch=vdv
-  commit=d07864b1ffe9356caf6a83ec1bb558058328229c
+  commit=6cfdc970792f485d3c24bd8a69de879f60c9d736
 [net]
   url=git@github.com:motis-project/net.git
   branch=master
-  commit=785b39c08212732e510305f0eef18de70f19b15e
+  commit=00e7ebc3e62b80d2f31672247dc550f2feb363aa
 [pugixml]
   url=git@github.com:motis-project/pugixml.git
   branch=master
