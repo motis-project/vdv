@@ -84,6 +84,16 @@ std::string abo_anfrage_xml_str(std::string const& sender,
   return xml_to_str(doc);
 }
 
+std::string abo_loeschen_anfrage_xml_str(std::string const& sender,
+                                         sys_time const t) {
+  auto doc = make_xml_doc();
+  add_abo_anfrage_node(doc, sender, t)
+      .append_child("AboLoeschenAlle")
+      .append_child(pugi::node_pcdata)
+      .set_value("true");
+  return xml_to_str(doc);
+}
+
 std::string abo_antwort_xml_str(sys_time const t,
                                 bool const success,
                                 std::uint32_t const error_code) {

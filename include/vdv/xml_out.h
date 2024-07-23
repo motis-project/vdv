@@ -19,9 +19,7 @@ std::string abo_anfrage_xml_str(std::string const& sender,
                                 std::chrono::seconds hysteresis,
                                 std::chrono::minutes look_ahead);
 
-std::string abo_loeschen_anfrage_xml_str(std::string const& sender,
-                                         sys_time,
-                                         std::vector<abo_id_t> const& abo_ids);
+std::string abo_loeschen_anfrage_xml_str(std::string const& sender, sys_time);
 
 std::string abo_antwort_xml_str(sys_time,
                                 bool success,

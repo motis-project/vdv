@@ -25,6 +25,11 @@ TEST(xml_out, abo_antwort) {
   EXPECT_EQ(abo_antwort_str, result_str(abo_antwort_xml_str(t, true, 0)));
 }
 
+TEST(xml_out, abo_loeschen) {
+  EXPECT_EQ(abo_loeschen_str,
+            result_str(abo_loeschen_anfrage_xml_str("motis", t)));
+}
+
 TEST(xml_out, daten_bereit_anfrage) {
   EXPECT_EQ(daten_bereit_anfrage_str,
             result_str(daten_bereit_anfrage_xml_str("motis", t)));

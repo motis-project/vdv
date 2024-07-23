@@ -21,7 +21,8 @@ namespace vdv {
 
 struct vdv_client {
 
-  vdv_client(std::string_view client_name,
+  vdv_client(boost::asio::io_context&,
+             std::string_view client_name,
              std::string_view client_ip,
              std::string_view client_port,
              std::string_view server_name,
@@ -37,12 +38,13 @@ struct vdv_client {
                  std::chrono::seconds hysteresis,
                  std::chrono::minutes look_ahead);
 
-  void clean_up_subs();
+  void cancel_sub();
 
   void fetch();
 
   void check_server_status();
 
+  boost::asio::io_context& ioc_;
   std::string client_name_;
   std::string client_ip_;
   std::string client_port_;
@@ -57,16 +59,9 @@ struct vdv_client {
 
   sys_time start_;
 
-  abo_id_t next_id_{0U};
-  std::forward_list<subscription> subs_;
-  std::mutex subs_mutex_;
-
   nigiri::timetable const* tt_;
   nigiri::rt_timetable* rtt_;
   nigiri::source_idx_t src_idx_;
-
-  boost::asio::io_context ioc_;
-  std::shared_ptr<net::http::client::basic_http_client<net::tcp>> http_client_;
 };
 
 }  // namespace vdv

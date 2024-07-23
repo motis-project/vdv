@@ -29,6 +29,13 @@ constexpr auto const abo_antwort_str = R"(
 </AboAntwort>
 )";
 
+constexpr auto const abo_loeschen_str = R"(
+<?xml version="1.0" encoding="iso-8859-1"?>
+<AboAnfrage Sender="motis" Zst="2024-06-21T13:37:23">
+  <AboLoeschenAlle>true</AboLoeschenAlle>
+</AboAnfrage>
+)";
+
 constexpr auto const daten_bereit_anfrage_str = R"(
 <?xml version="1.0" encoding="iso-8859-1"?>
 <DatenBereitAnfrage Sender="motis" Zst="2024-06-21T13:37:23" />
