@@ -48,11 +48,6 @@ std::ostream& operator<<(std::ostream& out, nhc::response const& r) {
   return out;
 }
 
-template <typename T>
-void report_failure(std::ostream& out, std::string_view ctx, T const& r) {
-  out << ctx << " failed: " << r << "\n";
-}
-
 vdv_client::vdv_client(boost::asio::io_context& ioc,
                        std::string_view client_name,
                        std::string_view client_ip,
@@ -89,22 +84,16 @@ void vdv_client::run() {
           .route("POST", client_status_path_,
                  [&](net::route_request const& req,
                      net::web_server::http_res_cb_t const& res_cb, bool) {
+                   std::cout << "client status request:\n" << req << "\n\n";
                    try {
                      auto const msg_in = parse(req.body());
                      if (holds_alternative<client_status_anfrage_msg>(msg_in)) {
-                       res_cb(string_response(
-                           req,
-                           client_status_antwort_xml_str(
-                               std::chrono::system_clock::now(), true, start_),
-                           http::status::ok, "text/xml"));
-                       std::cout
-                           << "Received request on client status endpoint, "
-                              "response: OK\n";
-                     } else {
-                       res_cb(net::bad_request_response(req));
-                       std::cout << "Received bad request on client status "
-                                    "endpoint:\n"
-                                 << req << "\n";
+                       auto const res_body = client_status_antwort_xml_str(
+                           std::chrono::system_clock::now(), true, start_);
+                       std::cout << "client status response:\n"
+                                 << req << "\n\n";
+                       res_cb(string_response(req, res_body, http::status::ok,
+                                              "text/xml"));
                      }
                    } catch (std::runtime_error const& e) {
                      res_cb(net::bad_request_response(req));
@@ -114,24 +103,18 @@ void vdv_client::run() {
                    }
                  })
           .route("POST", data_ready_path_,
-                 [this](net::route_request const& req,
-                        net::web_server::http_res_cb_t const& res_cb, bool) {
+                 [](net::route_request const& req,
+                    net::web_server::http_res_cb_t const& res_cb, bool) {
+                   std::cout << "data ready request:\n" << req << "\n\n";
                    try {
                      auto const msg_in = parse(req.body());
                      if (holds_alternative<daten_bereit_anfrage_msg>(msg_in)) {
-                       res_cb(string_response(
-                           req,
-                           daten_bereit_antwort_xml_str(
-                               std::chrono::system_clock::now(), true, 0),
-                           http::status::ok, "text/xml"));
-                       std::cout << "Received request on data ready endpoint, "
-                                    "fetching...\n";
-                       fetch();
-                     } else {
-                       res_cb(net::bad_request_response(req));
-                       std::cout << "Received bad request on data ready "
-                                    "endpoint:\n"
-                                 << req << "\n";
+                       auto const res_body = daten_bereit_antwort_xml_str(
+                           std::chrono::system_clock::now(), true, 0);
+                       std::cout << "data ready response:\n"
+                                 << res_body << "\n";
+                       res_cb(string_response(req, res_body, http::status::ok,
+                                              "text/xml"));
                      }
                    } catch (std::runtime_error const& e) {
                      res_cb(net::bad_request_response(req));
@@ -158,124 +141,90 @@ void vdv_client::subscribe(sys_time start,
                            sys_time end,
                            std::chrono::seconds hysteresis,
                            std::chrono::minutes look_ahead) {
-  cancel_sub();
+  unsubscribe();
 
-  std::cout << "sending subscription request to " << manage_sub_addr_ << ": ";
-  auto req = nhc::request(
-      manage_sub_addr_, nhc::request::method::POST, vdv_headers,
-      abo_anfrage_xml_str(client_name_, start, end, 1, hysteresis, look_ahead));
+  auto const req_body =
+      abo_anfrage_xml_str(client_name_, start, end, 1, hysteresis, look_ahead);
+  std::cout << "subscription request:\n" << req_body << "\n\n";
+  auto req = nhc::request(manage_sub_addr_, nhc::request::method::POST,
+                          vdv_headers, req_body);
   make_http(ioc_, server_addr_)
       ->query(req, [&]([[maybe_unused]] auto&& shrd_ptr, auto&& r,
                        [[maybe_unused]] auto&& ec) {
+        std::cout << "subscription response:\n" << r << "\n\n";
         if (r.status_code == 200) {
           try {
             auto const msg_in = parse(r.body);
             if (holds_alternative<abo_antwort_msg>(msg_in) &&
                 get<abo_antwort_msg>(msg_in).success_) {
-              std::cout << "successfully subscribed\n"
-                        << "\n";
-            } else {
-              report_failure(std::cout, "subscribe", r);
+              std::cout << "--> successfully subscribed\n\n";
             }
           } catch (std::runtime_error const& e) {
-            report_failure(std::cout, "subscribe", r);
             std::cout << e.what() << "\n";
           }
-        } else {
-          report_failure(std::cout, "subscribe", r);
         }
       });
 }
 
-void vdv_client::cancel_sub() {
-  auto req =
-      nhc::request(manage_sub_addr_, nhc::request::method::POST, vdv_headers,
-                   abo_loeschen_anfrage_xml_str(
-                       client_name_, std::chrono::system_clock::now()));
+void vdv_client::unsubscribe() {
+  auto const req_body = abo_loeschen_anfrage_xml_str(
+      client_name_, std::chrono::system_clock::now());
+  std::cout << "cancel sub request:\n" << req_body << "\n\n";
+  auto req = nhc::request(manage_sub_addr_, nhc::request::method::POST,
+                          vdv_headers, req_body);
   make_http(ioc_, server_addr_)
       ->query(req, [&]([[maybe_unused]] auto&& shrd_ptr, auto&& r,
                        [[maybe_unused]] auto&& ec) {
+        std::cout << "cancel sub response:\n" << r << "\n\n";
         if (r.status_code == 200) {
-          auto doc = pugi::xml_document{};
-          doc.load_string(r.body.c_str());
-          if (doc.select_node("AboAntwort")) {
-            try {
-              auto msg_in = parse(r.body);
-              if (holds_alternative<abo_antwort_msg>(msg_in)) {
-                auto const& status_msg = get<abo_antwort_msg>(msg_in);
-                if (status_msg.success_) {
-                  std::cout << "subscription canceled" << "\n";
-                } else {
-                  report_failure(std::cout, "cancel sub", r);
-                }
-              }
-            } catch (std::runtime_error const& e) {
-              report_failure(std::cout, "cancel sub", r);
-              std::cout << e.what() << "\n";
+          try {
+            auto const msg_in = parse(r.body);
+            if (holds_alternative<abo_antwort_msg>(msg_in) &&
+                get<abo_antwort_msg>(msg_in).success_) {
+              std::cout << "--> successfully unsubscribed\n\n";
             }
+          } catch (std::runtime_error const& e) {
+            std::cout << e.what() << "\n";
           }
-        } else {
-          report_failure(std::cout, "cancel sub", r);
         }
       });
 }
 
 void vdv_client::fetch() {
-  auto req =
-      nhc::request(fetch_data_addr_, nhc::request::method::POST, vdv_headers,
-                   daten_abrufen_anfrage_xml_str(
-                       client_name_, std::chrono::system_clock::now(), false));
+  auto const req_body = daten_abrufen_anfrage_xml_str(
+      client_name_, std::chrono::system_clock::now(), false);
+  auto req = nhc::request(fetch_data_addr_, nhc::request::method::POST,
+                          vdv_headers, req_body);
+  std::cout << "fetch data request:\n" << req_body << "\n\n";
   make_http(ioc_, server_addr_)
       ->query(req, [&]([[maybe_unused]] auto&& shrd_ptr, auto&& r,
                        [[maybe_unused]] auto&& ec) {
+        std::cout << "fetch data response:\n" << r << "\n" << std::endl;
         if (r.status_code == 200) {
-          auto doc = pugi::xml_document{};
-          doc.load_string(r.body.c_str());
-          if (doc.select_node("DatenAbrufenAntwort/AUSNachricht")) {
-            std::cout << "successfully fetched data\n";
-            stats_.emplace_back(
-                nigiri::rt::vdv::vdv_update(*tt_, *rtt_, src_idx_, doc));
+          try {
+            auto doc = pugi::xml_document{};
+            doc.load_string(r.body.c_str());
+            if (doc.select_node("DatenAbrufenAntwort/AUSNachricht")) {
+              stats_.emplace_back(
+                  nigiri::rt::vdv::vdv_update(*tt_, *rtt_, src_idx_, doc));
+            }
+          } catch (std::runtime_error const& e) {
+            std::cout << e.what() << "\n";
           }
-        } else {
-          std::cout << "data fetch failed, server replied:\n" << r;
         }
       });
 }
 
 void vdv_client::check_server_status() {
-  std::cout << "sending status request to " << status_addr_ << "\n";
-  auto req = nhc::request(
-      status_addr_, nhc::request::method::POST, vdv_headers,
-      status_anfrage_xml_str(client_name_, std::chrono::system_clock::now()));
+  auto const req_body =
+      status_anfrage_xml_str(client_name_, std::chrono::system_clock::now());
+  std::cout << "status request:\n" << req_body << "\n\n";
+  auto req = nhc::request(status_addr_, nhc::request::method::POST, vdv_headers,
+                          req_body);
   make_http(ioc_, server_addr_)
       ->query(req, [&]([[maybe_unused]] auto&& shrd_ptr, auto&& r,
                        [[maybe_unused]] auto&& ec) {
-        if (r.status_code == 200) {
-          auto doc = pugi::xml_document{};
-          doc.load_string(r.body.c_str());
-          if (doc.select_node("StatusAntwort")) {
-            try {
-              auto msg_in = parse(r.body);
-              if (holds_alternative<status_antwort_msg>(msg_in)) {
-                auto const& status_msg = get<status_antwort_msg>(msg_in);
-                if (status_msg.success_) {
-                  std::cout << "server check: OK";
-                  if (status_msg.data_rdy_) {
-                    std::cout << ", data ready";
-                  }
-                  std::cout << "\n";
-                } else {
-                  std::cout << "server check: BAD\n" << r << "\n";
-                }
-              }
-            } catch (std::runtime_error const& e) {
-              report_failure(std::cout, "server status check", r);
-              std::cout << e.what() << "\n";
-            }
-          }
-        } else {
-          report_failure(std::cout, "server status check", r);
-        }
+        std::cout << "status response:\n" << r << "\n\n";
       });
 }
 

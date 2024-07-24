@@ -39,7 +39,7 @@ struct vdv_client {
                  std::chrono::seconds hysteresis,
                  std::chrono::minutes look_ahead);
 
-  void cancel_sub();
+  void unsubscribe();
 
   void fetch();
 

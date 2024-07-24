@@ -76,11 +76,13 @@ int main(int argc, char* argv[]) {
   auto stop_time = std::chrono::system_clock::now() + 10min;
 
   while (std::chrono::system_clock::now() < stop_time) {
-    std::this_thread::sleep_for(60s);
+    std::this_thread::sleep_for(30s);
     client.check_server_status();
+    std::this_thread::sleep_for(30s);
+    client.fetch();
   }
 
-  client.cancel_sub();
+  client.unsubscribe();
 
   auto acc_stats = rt::vdv::statistics{};
   std::accumulate(begin(client.stats_), end(client.stats_), acc_stats);
