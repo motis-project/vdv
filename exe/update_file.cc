@@ -59,5 +59,6 @@ int main(int argc, char* argv[]) {
   auto doc = pugi::xml_document{};
   doc.load_string(ss.str().c_str());
 
-  rt::vdv::vdv_update(tt, rtt, source_idx_t{0}, doc);
+  std::cout << "Statistics:\n"
+            << rt::vdv::vdv_update(tt, rtt, source_idx_t{0}, doc) << "\n";
 }
