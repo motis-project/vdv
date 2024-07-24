@@ -75,6 +75,12 @@ target_compile_features(vdv-server PUBLIC cxx_std_23)
 target_link_libraries(vdv-server vdv boost-program_options web-server http-client)
 
 
+# --- UPDATE FILE ---
+add_executable(update-file exe/update_file.cc)
+target_compile_features(update-file PUBLIC cxx_std_23)
+target_link_libraries(update-file vdv nigiri boost-program_options)
+
+
 # --- TEST ---
 add_library(vdv-generated INTERFACE)
 target_include_directories(vdv-generated INTERFACE ${CMAKE_CURRENT_BINARY_DIR}/generated)
