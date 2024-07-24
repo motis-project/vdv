@@ -151,6 +151,7 @@ void vdv_client::run() {
     return;
   }
   std::cout << "listening on " << client_ip_ << ":" << client_port_ << "\n";
+  ioc_.run();
 }
 
 void vdv_client::subscribe(sys_time start,
@@ -201,7 +202,7 @@ void vdv_client::cancel_sub() {
             try {
               auto msg_in = parse(r.body);
               if (holds_alternative<abo_antwort_msg>(msg_in)) {
-                auto const& status_msg = get<status_antwort_msg>(msg_in);
+                auto const& status_msg = get<abo_antwort_msg>(msg_in);
                 if (status_msg.success_) {
                   std::cout << "subscription canceled" << "\n";
                 } else {

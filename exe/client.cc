@@ -10,6 +10,7 @@
 
 #include "nigiri/rt/create_rt_timetable.h"
 #include "nigiri/rt/rt_timetable.h"
+#include "nigiri/rt/vdv/vdv_update.h"
 #include "nigiri/timetable.h"
 #include "nigiri/types.h"
 
@@ -81,15 +82,7 @@ int main(int argc, char* argv[]) {
 
   client.cancel_sub();
 
-  int unsupported_additional_run{0};
-  int unsupported_cancelled_run{0};
-  int unsupported_additional_stop_{0};
-  int unmatchable_run_{0};
-  int matched_stops_{0};
-  int propagated_delay_{0};
-  for (auto const& stat : client.stats_) {
-    unsupported_additional_run += stat.unsupported_additional_run;
-    unsupported_cancelled_run += stat.unsupported_cancelled_run;
-    // TODO
-  }
+  auto acc_stats = rt::vdv::statistics{};
+  std::accumulate(begin(client.stats_), end(client.stats_), acc_stats);
+  std::cout << "Statistics:\n" << acc_stats << "\n";
 }
