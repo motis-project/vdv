@@ -46,7 +46,7 @@ int main(int argc, char* argv[]) {
   bpo::notify(vm);
 
   auto tt = *nigiri::timetable::read(cista::memory_holder{
-      cista::file{fs::path{"tt.bin"}.generic_string().c_str(), "r"}.content()});
+      cista::file{tt_path.generic_string().c_str(), "r"}.content()});
   tt.locations_.resolve_timezones();
 
   auto rtt =
@@ -59,6 +59,6 @@ int main(int argc, char* argv[]) {
   auto doc = pugi::xml_document{};
   doc.load_string(ss.str().c_str());
 
-  std::cout << "Statistics:\n"
-            << rt::vdv::vdv_update(tt, rtt, source_idx_t{0}, doc) << "\n";
+  auto const stats = rt::vdv::vdv_update(tt, rtt, source_idx_t{0}, doc);
+  std::cout << "\nStatistics:\n" << stats << "\n";
 }
