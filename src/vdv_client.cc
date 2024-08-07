@@ -54,7 +54,7 @@ void vdv_client::run() {
                        auto const res_body = client_status_antwort_xml_str(
                            std::chrono::system_clock::now(), true, start_);
                        std::cout << "client status response:\n"
-                                 << req << "\n\n";
+                                 << res_body << "\n\n";
                        res_cb(string_response(req, res_body, http::status::ok,
                                               "text/xml"));
                      }
