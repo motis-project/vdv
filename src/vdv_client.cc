@@ -1,5 +1,8 @@
 #include "vdv/vdv_client.h"
 
+#include "net/http/client/http_client.h"
+#include "net/http/client/request.h"
+#include "net/http/client/response.h"
 #include "net/run.h"
 #include "net/web_server/query_router.h"
 #include "net/web_server/responses.h"
@@ -7,6 +10,7 @@
 
 #include "nigiri/rt/vdv/vdv_update.h"
 
+#include "vdv/vdv_config.h"
 #include "vdv/xml_in.h"
 #include "vdv/xml_out.h"
 
@@ -18,21 +22,6 @@ using namespace net;
 
 auto const vdv_headers = std::map<std::string, std::string>{
     {"Content-Type", "text/xml"}, {"Accept", "text/xml"}};
-
-nhc::url get_endpoint_addr(std::string_view server_addr,
-                           std::string_view client_name,
-                           std::string_view path) {
-  auto ss = std::stringstream{};
-  ss << server_addr << "/" << client_name << "/" << path;
-  return {ss.str()};
-}
-
-std::string get_endpoint_path(std::string_view server_name,
-                              std::string_view request) {
-  auto ss = std::stringstream{};
-  ss << "/" << server_name << "/" << request;
-  return ss.str();
-}
 
 std::ostream& operator<<(std::ostream& out, net::route_request const& rr) {
   out << rr.body() << "\n";
@@ -48,40 +37,14 @@ std::ostream& operator<<(std::ostream& out, nhc::response const& r) {
   return out;
 }
 
-vdv_client::vdv_client(boost::asio::io_context& ioc,
-                       std::string_view client_name,
-                       std::string_view client_ip,
-                       std::string_view client_port,
-                       std::string_view server_name,
-                       nhc::url const& server_addr,
-                       nigiri::timetable const* tt,
-                       nigiri::rt_timetable* rtt,
-                       nigiri::source_idx_t const src_idx)
-    : ioc_{ioc},
-      client_name_{client_name},
-      client_ip_{client_ip},
-      client_port_{client_port},
-      server_name_{server_name},
-      server_addr_{server_addr},
-      status_addr_{
-          get_endpoint_addr(server_addr.str(), client_name_, "aus/status.xml")},
-      manage_sub_addr_{get_endpoint_addr(
-          server_addr.str(), client_name_, "aus/aboverwalten.xml")},
-      fetch_data_addr_{get_endpoint_addr(
-          server_addr.str(), client_name_, "aus/datenabrufen.xml")},
-      client_status_path_{
-          get_endpoint_path(server_name, "aus/clientstatus.xml")},
-      data_ready_path_{get_endpoint_path(server_name, "aus/datenbereit.xml")},
-      start_{std::chrono::system_clock::now()},
-      tt_{tt},
-      rtt_{rtt},
-      src_idx_{src_idx} {}
+vdv_client::vdv_client(vdv_config& cfg, boost::asio::io_context& ioc)
+    : cfg_{cfg}, ioc_{ioc}, start_{std::chrono::system_clock::now()} {}
 
 void vdv_client::run() {
   auto s = net::web_server{ioc_};
   auto qr =
       net::query_router{}
-          .route("POST", client_status_path_,
+          .route("POST", cfg_.client_status_path_,
                  [&](net::route_request const& req,
                      net::web_server::http_res_cb_t const& res_cb, bool) {
                    std::cout << "client status request:\n" << req << "\n\n";
@@ -102,7 +65,7 @@ void vdv_client::run() {
                                << e.what() << req << "\n";
                    }
                  })
-          .route("POST", data_ready_path_,
+          .route("POST", cfg_.data_ready_path_,
                  [](net::route_request const& req,
                     net::web_server::http_res_cb_t const& res_cb, bool) {
                    std::cout << "data ready request:\n" << req << "\n\n";
@@ -127,13 +90,14 @@ void vdv_client::run() {
   s.on_http_request(std::move(qr));
 
   auto ec = boost::system::error_code{};
-  s.init(client_ip_, client_port_, ec);
+  s.init(cfg_.client_ip_, cfg_.client_port_, ec);
   s.run();
   if (ec) {
     std::cerr << "error: " << ec << "\n";
     return;
   }
-  std::cout << "listening on " << client_ip_ << ":" << client_port_ << "\n";
+  std::cout << "listening on " << cfg_.client_ip_ << ":" << cfg_.client_port_
+            << "\n";
   ioc_.run();
 }
 
@@ -143,12 +107,12 @@ void vdv_client::subscribe(sys_time start,
                            std::chrono::minutes look_ahead) {
   unsubscribe();
 
-  auto const req_body =
-      abo_anfrage_xml_str(client_name_, start, end, 1, hysteresis, look_ahead);
+  auto const req_body = abo_anfrage_xml_str(cfg_.client_name_, start, end, 1,
+                                            hysteresis, look_ahead);
   std::cout << "subscription request:\n" << req_body << "\n\n";
-  auto req = nhc::request(manage_sub_addr_, nhc::request::method::POST,
+  auto req = nhc::request(cfg_.manage_sub_addr_, nhc::request::method::POST,
                           vdv_headers, req_body);
-  make_http(ioc_, server_addr_)
+  make_http(ioc_, cfg_.manage_sub_addr_)
       ->query(req, [&]([[maybe_unused]] auto&& shrd_ptr, auto&& r,
                        [[maybe_unused]] auto&& ec) {
         std::cout << "subscription response:\n" << r << "\n\n";
@@ -168,11 +132,11 @@ void vdv_client::subscribe(sys_time start,
 
 void vdv_client::unsubscribe() {
   auto const req_body = abo_loeschen_anfrage_xml_str(
-      client_name_, std::chrono::system_clock::now());
+      cfg_.client_name_, std::chrono::system_clock::now());
   std::cout << "cancel sub request:\n" << req_body << "\n\n";
-  auto req = nhc::request(manage_sub_addr_, nhc::request::method::POST,
+  auto req = nhc::request(cfg_.manage_sub_addr_, nhc::request::method::POST,
                           vdv_headers, req_body);
-  make_http(ioc_, server_addr_)
+  make_http(ioc_, cfg_.manage_sub_addr_)
       ->query(req, [&]([[maybe_unused]] auto&& shrd_ptr, auto&& r,
                        [[maybe_unused]] auto&& ec) {
         std::cout << "cancel sub response:\n" << r << "\n\n";
@@ -190,13 +154,14 @@ void vdv_client::unsubscribe() {
       });
 }
 
-void vdv_client::fetch() {
+nigiri::rt::vdv::statistics vdv_client::fetch() {
   auto const req_body = daten_abrufen_anfrage_xml_str(
-      client_name_, std::chrono::system_clock::now(), false);
-  auto req = nhc::request(fetch_data_addr_, nhc::request::method::POST,
+      cfg_.client_name_, std::chrono::system_clock::now(), false);
+  auto req = nhc::request(cfg_.fetch_data_addr_, nhc::request::method::POST,
                           vdv_headers, req_body);
   std::cout << "fetch data request:\n" << req_body << "\n\n";
-  make_http(ioc_, server_addr_)
+  auto stats = nigiri::rt::vdv::statistics{};
+  make_http(ioc_, cfg_.fetch_data_addr_)
       ->query(req, [&]([[maybe_unused]] auto&& shrd_ptr, auto&& r,
                        [[maybe_unused]] auto&& ec) {
         std::cout << "fetch data response:\n" << r << "\n" << std::endl;
@@ -205,23 +170,24 @@ void vdv_client::fetch() {
             auto doc = pugi::xml_document{};
             doc.load_string(r.body.c_str());
             if (doc.select_node("DatenAbrufenAntwort/AUSNachricht")) {
-              stats_.emplace_back(
-                  nigiri::rt::vdv::vdv_update(*tt_, *rtt_, src_idx_, doc));
+              stats = nigiri::rt::vdv::vdv_update(*cfg_.tt_, *cfg_.rtt_,
+                                                  cfg_.src_idx_, doc);
             }
           } catch (std::runtime_error const& e) {
             std::cout << e.what() << "\n";
           }
         }
       });
+  return stats;
 }
 
 void vdv_client::check_server_status() {
-  auto const req_body =
-      status_anfrage_xml_str(client_name_, std::chrono::system_clock::now());
+  auto const req_body = status_anfrage_xml_str(
+      cfg_.client_name_, std::chrono::system_clock::now());
   std::cout << "status request:\n" << req_body << "\n\n";
-  auto req = nhc::request(status_addr_, nhc::request::method::POST, vdv_headers,
-                          req_body);
-  make_http(ioc_, server_addr_)
+  auto req = nhc::request(cfg_.status_addr_, nhc::request::method::POST,
+                          vdv_headers, req_body);
+  make_http(ioc_, cfg_.status_addr_)
       ->query(req, [&]([[maybe_unused]] auto&& shrd_ptr, auto&& r,
                        [[maybe_unused]] auto&& ec) {
         std::cout << "status response:\n" << r << "\n\n";
