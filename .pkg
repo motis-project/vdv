@@ -21,7 +21,7 @@
 [net]
   url=git@github.com:motis-project/net.git
   branch=master
-  commit=00e7ebc3e62b80d2f31672247dc550f2feb363aa
+  commit=e14f4c6ba0c80df92cfd659389f561440f381d69
 [pugixml]
   url=git@github.com:motis-project/pugixml.git
   branch=master
