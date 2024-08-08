@@ -14,10 +14,6 @@ namespace vdv {
 struct vdv_config {
   void derive_endpoints();
 
-  nigiri::timetable const* tt_;
-  nigiri::rt_timetable* rtt_;
-  nigiri::source_idx_t src_idx_;
-
   std::string client_name_;
   std::string client_ip_;
   std::string client_port_;

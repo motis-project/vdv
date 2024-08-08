@@ -158,7 +158,10 @@ void vdv_client::unsubscribe() {
       });
 }
 
-nigiri::rt::vdv::statistics vdv_client::fetch() {
+nigiri::rt::vdv::statistics vdv_client::update(
+    nigiri::timetable const& tt,
+    nigiri::rt_timetable& rtt,
+    nigiri::source_idx_t const src_idx) {
   auto const req_body = daten_abrufen_anfrage_xml_str(
       cfg_.client_name_, std::chrono::system_clock::now(), false);
   auto req = nhc::request(cfg_.fetch_data_addr_, nhc::request::method::POST,
@@ -174,8 +177,7 @@ nigiri::rt::vdv::statistics vdv_client::fetch() {
             auto doc = pugi::xml_document{};
             doc.load_string(r.body.c_str());
             if (doc.select_node("DatenAbrufenAntwort/AUSNachricht")) {
-              stats = nigiri::rt::vdv::vdv_update(*cfg_.tt_, *cfg_.rtt_,
-                                                  cfg_.src_idx_, doc);
+              stats = nigiri::rt::vdv::vdv_update(tt, rtt, src_idx, doc);
             }
           } catch (std::runtime_error const& e) {
             std::cout << e.what() << "\n";

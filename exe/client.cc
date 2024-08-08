@@ -60,9 +60,6 @@ int main(int argc, char* argv[]) {
       rt::create_rt_timetable(tt, std::chrono::time_point_cast<date::days>(
                                       std::chrono::system_clock::now()));
 
-  cfg.tt_ = &tt;
-  cfg.rtt_ = &rtt;
-  cfg.src_idx_ = source_idx_t{0};
   cfg.derive_endpoints();
 
   auto ioc = boost::asio::io_context{};
@@ -84,7 +81,7 @@ int main(int argc, char* argv[]) {
     std::this_thread::sleep_for(30s);
     client.check_server_status();
     std::this_thread::sleep_for(30s);
-    stats.emplace_back(client.fetch());
+    stats.emplace_back(client.update(tt, rtt, source_idx_t{0U}));
   }
 
   client.stop();

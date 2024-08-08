@@ -2,6 +2,8 @@
 
 #include "net/web_server/web_server.h"
 
+#include "nigiri/types.h"
+
 #include "vdv/types.h"
 
 namespace nigiri {
@@ -36,7 +38,9 @@ struct vdv_client {
 
   void unsubscribe();
 
-  nigiri::rt::vdv::statistics fetch();
+  nigiri::rt::vdv::statistics update(nigiri::timetable const&,
+                                     nigiri::rt_timetable&,
+                                     nigiri::source_idx_t);
 
   void check_server_status();
 
