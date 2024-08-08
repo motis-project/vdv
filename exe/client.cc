@@ -25,6 +25,8 @@ using namespace net::http::client;
 using namespace vdv;
 using namespace nigiri;
 
+void run(boost::asio::io_context& ioc) { ioc.run(); }
+
 int main(int argc, char* argv[]) {
 
   auto tt_path = std::filesystem::path{};
@@ -64,11 +66,12 @@ int main(int argc, char* argv[]) {
   cfg.derive_endpoints();
 
   auto ioc = boost::asio::io_context{};
+  auto work_guard = boost::asio::make_work_guard(ioc);
+  auto t = std::thread{run, std::ref(ioc)};
 
   auto client = vdv_client{cfg, ioc};
 
-  std::thread t(&vdv_client::run, &client);
-  t.detach();
+  client.run();
 
   client.subscribe(std::chrono::system_clock::now(),
                    std::chrono::system_clock::now() + 10min, 30s, 60min);
@@ -84,7 +87,8 @@ int main(int argc, char* argv[]) {
     stats.emplace_back(client.fetch());
   }
 
-  client.unsubscribe();
+  client.stop();
+  t.join();
 
   auto acc_stats = rt::vdv::statistics{};
   std::accumulate(begin(stats), end(stats), acc_stats);

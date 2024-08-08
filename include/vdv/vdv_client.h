@@ -1,5 +1,7 @@
 #pragma once
 
+#include "net/web_server/web_server.h"
+
 #include "vdv/types.h"
 
 namespace nigiri {
@@ -25,6 +27,8 @@ struct vdv_client {
 
   void run();
 
+  void stop();
+
   void subscribe(sys_time start,
                  sys_time end,
                  std::chrono::seconds hysteresis,
@@ -39,6 +43,7 @@ struct vdv_client {
   vdv_config& cfg_;
   boost::asio::io_context& ioc_;
   sys_time start_;
+  std::unique_ptr<net::web_server> svr_;
 };
 
 }  // namespace vdv

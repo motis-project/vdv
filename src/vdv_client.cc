@@ -41,7 +41,7 @@ vdv_client::vdv_client(vdv_config& cfg, boost::asio::io_context& ioc)
     : cfg_{cfg}, ioc_{ioc}, start_{std::chrono::system_clock::now()} {}
 
 void vdv_client::run() {
-  auto s = net::web_server{ioc_};
+  svr_ = std::make_unique<net::web_server>(ioc_);
   auto qr =
       net::query_router{}
           .route("POST", cfg_.client_status_path_,
@@ -87,18 +87,22 @@ void vdv_client::run() {
                    }
                  });
   qr.enable_cors();
-  s.on_http_request(std::move(qr));
+  svr_->on_http_request(std::move(qr));
 
   auto ec = boost::system::error_code{};
-  s.init(cfg_.client_ip_, cfg_.client_port_, ec);
-  s.run();
+  svr_->init(cfg_.client_ip_, cfg_.client_port_, ec);
+  svr_->run();
   if (ec) {
     std::cerr << "error: " << ec << "\n";
     return;
   }
   std::cout << "listening on " << cfg_.client_ip_ << ":" << cfg_.client_port_
             << "\n";
-  ioc_.run();
+}
+
+void vdv_client::stop() {
+  unsubscribe();
+  svr_->stop();
 }
 
 void vdv_client::subscribe(sys_time start,
