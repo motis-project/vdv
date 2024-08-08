@@ -14,6 +14,8 @@ namespace vdv {
 struct vdv_config {
   void derive_endpoints();
 
+  std::string tag_;
+
   std::string client_name_;
   std::string client_ip_;
   std::string client_port_;
