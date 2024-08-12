@@ -8,8 +8,6 @@
 #include "net/web_server/responses.h"
 #include "net/web_server/web_server.h"
 
-#include "nigiri/rt/vdv/vdv_update.h"
-
 #include "vdv/vdv_config.h"
 #include "vdv/xml_in.h"
 #include "vdv/xml_out.h"
@@ -158,33 +156,11 @@ void vdv_client::unsubscribe() {
       });
 }
 
-nigiri::rt::vdv::statistics vdv_client::update(
-    nigiri::timetable const& tt,
-    nigiri::rt_timetable& rtt,
-    nigiri::source_idx_t const src_idx) {
-  auto const req_body = daten_abrufen_anfrage_xml_str(
-      cfg_.client_name_, std::chrono::system_clock::now(), false);
-  auto req = nhc::request(cfg_.fetch_data_addr_, nhc::request::method::POST,
-                          vdv_headers, req_body);
-  std::cout << "fetch data request:\n" << req_body << "\n\n";
-  auto stats = nigiri::rt::vdv::statistics{};
-  make_http(ioc_, cfg_.fetch_data_addr_)
-      ->query(req, [&]([[maybe_unused]] auto&& shrd_ptr, auto&& r,
-                       [[maybe_unused]] auto&& ec) {
-        std::cout << "fetch data response:\n" << r << "\n" << std::endl;
-        if (r.status_code == 200) {
-          try {
-            auto doc = pugi::xml_document{};
-            doc.load_string(r.body.c_str());
-            if (doc.select_node("DatenAbrufenAntwort/AUSNachricht")) {
-              stats = nigiri::rt::vdv::vdv_update(tt, rtt, src_idx, doc);
-            }
-          } catch (std::runtime_error const& e) {
-            std::cout << e.what() << "\n";
-          }
-        }
-      });
-  return stats;
+nhc::request vdv_client::make_fetch_req() {
+  return nhc::request{
+      cfg_.fetch_data_addr_, nhc::request::method::POST, vdv_headers,
+      daten_abrufen_anfrage_xml_str(cfg_.client_name_,
+                                    std::chrono::system_clock::now(), false)};
 }
 
 void vdv_client::check_server_status() {

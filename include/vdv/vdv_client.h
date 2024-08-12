@@ -1,5 +1,6 @@
 #pragma once
 
+#include "net/http/client/request.h"
 #include "net/web_server/web_server.h"
 
 #include "nigiri/types.h"
@@ -38,9 +39,7 @@ struct vdv_client {
 
   void unsubscribe();
 
-  nigiri::rt::vdv::statistics update(nigiri::timetable const&,
-                                     nigiri::rt_timetable&,
-                                     nigiri::source_idx_t);
+  net::http::client::request make_fetch_req();
 
   void check_server_status();
 
