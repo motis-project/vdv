@@ -17,7 +17,7 @@
 [nigiri]
   url=git@github.com:mority/nigiri.git
   branch=vdv
-  commit=f6d5c3b9a2de5e9c4cde4d3c8477d5148d7a7e53
+  commit=a430824b782b8dda112b336edfe10177ef28195c
 [net]
   url=git@github.com:motis-project/net.git
   branch=master
