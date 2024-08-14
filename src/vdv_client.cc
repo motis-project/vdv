@@ -35,11 +35,11 @@ std::ostream& operator<<(std::ostream& out, nhc::response const& r) {
   return out;
 }
 
-vdv_client::vdv_client(vdv_config& cfg, boost::asio::io_context& ioc)
-    : cfg_{cfg}, ioc_{ioc}, start_{std::chrono::system_clock::now()} {}
+vdv_client::vdv_client(vdv_config& cfg)
+    : cfg_{cfg}, start_{std::chrono::system_clock::now()} {}
 
-void vdv_client::run() {
-  svr_ = std::make_unique<net::web_server>(ioc_);
+void vdv_client::run(boost::asio::io_context& ioc) {
+  svr_ = std::make_unique<net::web_server>(ioc);
   auto qr =
       net::query_router{}
           .route("POST", cfg_.client_status_path_,
@@ -98,23 +98,22 @@ void vdv_client::run() {
             << "\n";
 }
 
-void vdv_client::stop() {
-  unsubscribe();
+void vdv_client::stop(boost::asio::io_context& ioc) {
+  unsubscribe(ioc);
   svr_->stop();
 }
 
-void vdv_client::subscribe(sys_time start,
+void vdv_client::subscribe(boost::asio::io_context& ioc,
+                           sys_time start,
                            sys_time end,
                            std::chrono::seconds hysteresis,
                            std::chrono::minutes look_ahead) {
-  unsubscribe();
-
   auto const req_body = abo_anfrage_xml_str(cfg_.client_name_, start, end, 1,
                                             hysteresis, look_ahead);
   std::cout << "subscription request:\n" << req_body << "\n\n";
   auto req = nhc::request(cfg_.manage_sub_addr_, nhc::request::method::POST,
                           vdv_headers, req_body);
-  make_http(ioc_, cfg_.manage_sub_addr_)
+  make_http(ioc, cfg_.manage_sub_addr_)
       ->query(req, [&]([[maybe_unused]] auto&& shrd_ptr, auto&& r,
                        [[maybe_unused]] auto&& ec) {
         std::cout << "subscription response:\n" << r << "\n\n";
@@ -132,13 +131,13 @@ void vdv_client::subscribe(sys_time start,
       });
 }
 
-void vdv_client::unsubscribe() {
+void vdv_client::unsubscribe(boost::asio::io_context& ioc) {
   auto const req_body = abo_loeschen_anfrage_xml_str(
       cfg_.client_name_, std::chrono::system_clock::now());
   std::cout << "cancel sub request:\n" << req_body << "\n\n";
   auto req = nhc::request(cfg_.manage_sub_addr_, nhc::request::method::POST,
                           vdv_headers, req_body);
-  make_http(ioc_, cfg_.manage_sub_addr_)
+  make_http(ioc, cfg_.manage_sub_addr_)
       ->query(req, [&]([[maybe_unused]] auto&& shrd_ptr, auto&& r,
                        [[maybe_unused]] auto&& ec) {
         std::cout << "cancel sub response:\n" << r << "\n\n";
@@ -163,13 +162,13 @@ nhc::request vdv_client::make_fetch_req() {
                                     std::chrono::system_clock::now(), false)};
 }
 
-void vdv_client::check_server_status() {
+void vdv_client::check_server_status(boost::asio::io_context& ioc) {
   auto const req_body = status_anfrage_xml_str(
       cfg_.client_name_, std::chrono::system_clock::now());
   std::cout << "status request:\n" << req_body << "\n\n";
   auto req = nhc::request(cfg_.status_addr_, nhc::request::method::POST,
                           vdv_headers, req_body);
-  make_http(ioc_, cfg_.status_addr_)
+  make_http(ioc, cfg_.status_addr_)
       ->query(req, [&]([[maybe_unused]] auto&& shrd_ptr, auto&& r,
                        [[maybe_unused]] auto&& ec) {
         std::cout << "status response:\n" << r << "\n\n";
