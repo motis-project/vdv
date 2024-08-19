@@ -26,11 +26,11 @@ struct vdv_config;
 
 struct vdv_client {
 
-  vdv_client(vdv_config&);
+  explicit vdv_client(vdv_config&);
 
   void run(boost::asio::io_context& ioc);
 
-  void stop(boost::asio::io_context& ioc);
+  void stop();
 
   void subscribe(boost::asio::io_context&,
                  sys_time start,
@@ -40,9 +40,15 @@ struct vdv_client {
 
   void unsubscribe(boost::asio::io_context&);
 
-  net::http::client::request make_fetch_req();
-
-  void check_server_status(boost::asio::io_context&);
+  net::http::client::request make_sub_req(
+      sys_time start,
+      sys_time end,
+      std::uint64_t abo_id,
+      std::chrono::seconds hysteresis,
+      std::chrono::minutes look_ahead) const;
+  net::http::client::request make_unsub_req(sys_time) const;
+  net::http::client::request make_fetch_req() const;
+  net::http::client::request make_server_status_req(sys_time) const;
 
   vdv_config& cfg_;
   sys_time start_;

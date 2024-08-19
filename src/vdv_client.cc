@@ -98,10 +98,7 @@ void vdv_client::run(boost::asio::io_context& ioc) {
             << "\n";
 }
 
-void vdv_client::stop(boost::asio::io_context& ioc) {
-  unsubscribe(ioc);
-  svr_->stop();
-}
+void vdv_client::stop() { svr_->stop(); }
 
 void vdv_client::subscribe(boost::asio::io_context& ioc,
                            sys_time start,
@@ -155,24 +152,34 @@ void vdv_client::unsubscribe(boost::asio::io_context& ioc) {
       });
 }
 
-nhc::request vdv_client::make_fetch_req() {
+nhc::request vdv_client::make_sub_req(sys_time start,
+                                      sys_time end,
+                                      std::uint64_t abo_id,
+                                      std::chrono::seconds hysteresis,
+                                      std::chrono::minutes look_ahead) const {
+  return nhc::request{cfg_.manage_sub_addr_, nhc::request::method::POST,
+                      vdv_headers,
+                      abo_anfrage_xml_str(cfg_.client_name_, start, end, abo_id,
+                                          hysteresis, look_ahead)};
+}
+
+nhc::request vdv_client::make_unsub_req(sys_time t) const {
+  return nhc::request{cfg_.manage_sub_addr_, nhc::request::method::POST,
+                      vdv_headers,
+                      abo_loeschen_anfrage_xml_str(cfg_.client_name_, t)};
+}
+
+nhc::request vdv_client::make_fetch_req() const {
   return nhc::request{
       cfg_.fetch_data_addr_, nhc::request::method::POST, vdv_headers,
       daten_abrufen_anfrage_xml_str(cfg_.client_name_,
                                     std::chrono::system_clock::now(), false)};
 }
 
-void vdv_client::check_server_status(boost::asio::io_context& ioc) {
-  auto const req_body = status_anfrage_xml_str(
-      cfg_.client_name_, std::chrono::system_clock::now());
-  std::cout << "status request:\n" << req_body << "\n\n";
-  auto req = nhc::request(cfg_.status_addr_, nhc::request::method::POST,
-                          vdv_headers, req_body);
-  make_http(ioc, cfg_.status_addr_)
-      ->query(req, [&]([[maybe_unused]] auto&& shrd_ptr, auto&& r,
-                       [[maybe_unused]] auto&& ec) {
-        std::cout << "status response:\n" << r << "\n\n";
-      });
+nhc::request vdv_client::make_server_status_req(sys_time t) const {
+  return nhc::request{cfg_.status_addr_, nhc::request::method::POST,
+                      vdv_headers,
+                      status_anfrage_xml_str(cfg_.client_name_, t)};
 }
 
 }  // namespace vdv
