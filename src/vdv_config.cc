@@ -1,5 +1,7 @@
 #include "vdv/vdv_config.h"
 
+#include <sstream>
+
 namespace vdv {
 
 net::http::client::url get_endpoint_addr(std::string_view server_addr,

@@ -8,12 +8,6 @@
 #include "net/http/client/http_client.h"
 #include "net/run.h"
 
-#include "nigiri/rt/create_rt_timetable.h"
-#include "nigiri/rt/rt_timetable.h"
-#include "nigiri/rt/vdv/vdv_update.h"
-#include "nigiri/timetable.h"
-#include "nigiri/types.h"
-
 #include "vdv/vdv_client.h"
 #include "vdv/vdv_config.h"
 
@@ -23,7 +17,6 @@ using namespace std::literals::chrono_literals;
 using namespace std::string_literals;
 using namespace net::http::client;
 using namespace vdv;
-using namespace nigiri;
 
 void run(boost::asio::io_context& ioc) { ioc.run(); }
 
@@ -52,42 +45,26 @@ int main(int argc, char* argv[]) {
 
   bpo::notify(vm);
 
-  auto tt = *nigiri::timetable::read(
-      cista::memory_holder{cista::file{tt_path.c_str(), "r"}.content()});
-  tt.locations_.resolve_timezones();
-
-  auto rtt =
-      rt::create_rt_timetable(tt, std::chrono::time_point_cast<date::days>(
-                                      std::chrono::system_clock::now()));
-
   cfg.derive_endpoints();
 
   auto ioc = boost::asio::io_context{};
   auto work_guard = boost::asio::make_work_guard(ioc);
   auto t = std::thread{run, std::ref(ioc)};
 
-  auto client = vdv_client{cfg, ioc};
+  auto client = vdv_client{cfg};
 
-  client.run();
-
-  client.subscribe(std::chrono::system_clock::now(),
-                   std::chrono::system_clock::now() + 10min, 30s, 60min);
+  client.run(ioc);
 
   auto stop_time = std::chrono::system_clock::now() + 10min;
 
-  auto stats = std::vector<rt::vdv::statistics>{};
-
   while (std::chrono::system_clock::now() < stop_time) {
+    client.subscribe(ioc, std::chrono::system_clock::now(),
+                     std::chrono::system_clock::now() + 10min, 30s, 60min);
     std::this_thread::sleep_for(30s);
-    client.check_server_status();
+    client.unsubscribe(ioc);
     std::this_thread::sleep_for(30s);
-    stats.emplace_back(client.update(tt, rtt, source_idx_t{0U}));
   }
 
   client.stop();
   t.join();
-
-  auto acc_stats = rt::vdv::statistics{};
-  std::accumulate(begin(stats), end(stats), acc_stats);
-  std::cout << "Statistics:\n" << acc_stats << "\n";
 }

@@ -2,13 +2,6 @@
 
 #include "net/http/client/url.h"
 
-#include "nigiri/types.h"
-
-namespace nigiri {
-struct timetable;
-struct rt_timetable;
-}  // namespace nigiri
-
 namespace vdv {
 
 struct vdv_config {

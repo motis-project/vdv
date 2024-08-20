@@ -3,18 +3,7 @@
 #include "net/http/client/request.h"
 #include "net/web_server/web_server.h"
 
-#include "nigiri/types.h"
-
 #include "vdv/types.h"
-
-namespace nigiri {
-struct timetable;
-struct rt_timetable;
-}  // namespace nigiri
-
-namespace nigiri::rt::vdv {
-struct statistics;
-}  // namespace nigiri::rt::vdv
 
 namespace boost::asio {
 struct io_context;
