@@ -10,8 +10,8 @@ namespace vdv {
 using sys_time = std::chrono::time_point<std::chrono::system_clock>;
 
 inline std::string timestamp(const sys_time t) {
-  return std::format("{0:%F}T{0:%T}",
-                     std::chrono::time_point_cast<std::chrono::seconds>(t));
+  return date::format("%FT%T",
+                      std::chrono::time_point_cast<std::chrono::seconds>(t));
 }
 
 inline sys_time parse_timestamp(std::string const& str) {
