@@ -73,7 +73,7 @@ struct client_status_antwort_msg {
   std::vector<abo_id_t> active_subs_;
 };
 
-using vdv_msg = std::variant<abo_anfrage_msg,
+using aus_msg = std::variant<abo_anfrage_msg,
                              abo_antwort_msg,
                              daten_bereit_anfrage_msg,
                              daten_bereit_antwort_msg,

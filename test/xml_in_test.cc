@@ -2,7 +2,7 @@
 
 #include <chrono>
 
-#include "vdv/msg.h"
+#include "vdv/aus_msg.h"
 #include "vdv/xml_in.h"
 
 #include "xml_test_data.h"
@@ -11,17 +11,17 @@ using namespace vdv;
 using namespace std::literals::chrono_literals;
 
 TEST(xml_in, empty) {
-  EXPECT_THROW(parse(""), std::runtime_error);
-  EXPECT_THROW(parse(empty_xml_str), std::runtime_error);
+  EXPECT_THROW(parse_aus(""), std::runtime_error);
+  EXPECT_THROW(parse_aus(empty_xml_str), std::runtime_error);
 }
 
 TEST(xml_in, unsupported) {
-  EXPECT_THROW(parse(unsupported_str), std::runtime_error);
+  EXPECT_THROW(parse_aus(unsupported_str), std::runtime_error);
 }
 
 TEST(xml_in, abo_anfrage) {
-  ASSERT_NO_THROW(parse(abo_anfrage_str));
-  auto const msg = parse(abo_anfrage_str);
+  ASSERT_NO_THROW(parse_aus(abo_anfrage_str));
+  auto const msg = parse_aus(abo_anfrage_str);
   ASSERT_TRUE(holds_alternative<abo_anfrage_msg>(msg));
   auto const abo_anfrage_actual = get<abo_anfrage_msg>(msg);
   EXPECT_EQ(abo_anfrage_actual.sender_, "motis");
@@ -34,8 +34,8 @@ TEST(xml_in, abo_anfrage) {
 }
 
 TEST(xml_in, abo_antwort) {
-  ASSERT_NO_THROW(parse(abo_antwort_str));
-  auto const msg = parse(abo_antwort_str);
+  ASSERT_NO_THROW(parse_aus(abo_antwort_str));
+  auto const msg = parse_aus(abo_antwort_str);
   ASSERT_TRUE(holds_alternative<abo_antwort_msg>(msg));
   auto const abo_antwort_actual = get<abo_antwort_msg>(msg);
   EXPECT_EQ(abo_antwort_actual.t_, t);
@@ -44,8 +44,8 @@ TEST(xml_in, abo_antwort) {
 }
 
 TEST(xml_in, daten_bereit_anfrage) {
-  ASSERT_NO_THROW(parse(daten_bereit_anfrage_str));
-  auto const msg = parse(daten_bereit_anfrage_str);
+  ASSERT_NO_THROW(parse_aus(daten_bereit_anfrage_str));
+  auto const msg = parse_aus(daten_bereit_anfrage_str);
   ASSERT_TRUE(holds_alternative<daten_bereit_anfrage_msg>(msg));
   auto const daten_bereit_anfrage_actual = get<daten_bereit_anfrage_msg>(msg);
   EXPECT_EQ(daten_bereit_anfrage_actual.sender_, "motis");
@@ -53,8 +53,8 @@ TEST(xml_in, daten_bereit_anfrage) {
 }
 
 TEST(xml_in, daten_bereit_antwort) {
-  ASSERT_NO_THROW(parse(daten_bereit_antwort_str));
-  auto const msg = parse(daten_bereit_antwort_str);
+  ASSERT_NO_THROW(parse_aus(daten_bereit_antwort_str));
+  auto const msg = parse_aus(daten_bereit_antwort_str);
   ASSERT_TRUE(holds_alternative<daten_bereit_antwort_msg>(msg));
   auto const daten_bereit_antwort_actual = get<daten_bereit_antwort_msg>(msg);
   EXPECT_EQ(daten_bereit_antwort_actual.t_, t);
@@ -63,8 +63,8 @@ TEST(xml_in, daten_bereit_antwort) {
 }
 
 TEST(xml_in, daten_abrufen_anfrage_all_datasets) {
-  ASSERT_NO_THROW(parse(daten_abrufen_anfrage_all_datasets_str));
-  auto const msg = parse(daten_abrufen_anfrage_all_datasets_str);
+  ASSERT_NO_THROW(parse_aus(daten_abrufen_anfrage_all_datasets_str));
+  auto const msg = parse_aus(daten_abrufen_anfrage_all_datasets_str);
   ASSERT_TRUE(holds_alternative<daten_abrufen_anfrage_msg>(msg));
   auto const daten_abrufen_anfrage_actual = get<daten_abrufen_anfrage_msg>(msg);
   EXPECT_EQ(daten_abrufen_anfrage_actual.sender_, "motis");
@@ -73,8 +73,8 @@ TEST(xml_in, daten_abrufen_anfrage_all_datasets) {
 }
 
 TEST(xml_in, daten_abrufen_anfrage) {
-  ASSERT_NO_THROW(parse(daten_abrufen_anfrage_str));
-  auto const msg = parse(daten_abrufen_anfrage_str);
+  ASSERT_NO_THROW(parse_aus(daten_abrufen_anfrage_str));
+  auto const msg = parse_aus(daten_abrufen_anfrage_str);
   ASSERT_TRUE(holds_alternative<daten_abrufen_anfrage_msg>(msg));
   auto const daten_abrufen_anfrage_actual = get<daten_abrufen_anfrage_msg>(msg);
   EXPECT_EQ(daten_abrufen_anfrage_actual.sender_, "motis");
@@ -83,8 +83,8 @@ TEST(xml_in, daten_abrufen_anfrage) {
 }
 
 TEST(xml_in, daten_abrufen_antwort) {
-  ASSERT_NO_THROW(parse(daten_abrufen_antwort_str));
-  auto const msg = parse(daten_abrufen_antwort_str);
+  ASSERT_NO_THROW(parse_aus(daten_abrufen_antwort_str));
+  auto const msg = parse_aus(daten_abrufen_antwort_str);
   ASSERT_TRUE(holds_alternative<daten_abrufen_antwort_msg>(msg));
   auto const daten_abrufen_antwort_actual = get<daten_abrufen_antwort_msg>(msg);
 
@@ -95,8 +95,8 @@ TEST(xml_in, daten_abrufen_antwort) {
 }
 
 TEST(xml_in, status_anfrage) {
-  ASSERT_NO_THROW(parse(status_anfrage_str));
-  auto const msg = parse(status_anfrage_str);
+  ASSERT_NO_THROW(parse_aus(status_anfrage_str));
+  auto const msg = parse_aus(status_anfrage_str);
   ASSERT_TRUE(holds_alternative<status_anfrage_msg>(msg));
   auto const status_anfrage_actual = get<status_anfrage_msg>(msg);
   EXPECT_EQ(status_anfrage_actual.sender_, "motis");
@@ -104,8 +104,8 @@ TEST(xml_in, status_anfrage) {
 }
 
 TEST(xml_in, status_antwort) {
-  ASSERT_NO_THROW(parse(status_antwort_str));
-  auto const msg = parse(status_antwort_str);
+  ASSERT_NO_THROW(parse_aus(status_antwort_str));
+  auto const msg = parse_aus(status_antwort_str);
   ASSERT_TRUE(holds_alternative<status_antwort_msg>(msg));
   auto const status_antwort_actual = get<status_antwort_msg>(msg);
   EXPECT_EQ(status_antwort_actual.t_, t);
@@ -115,8 +115,8 @@ TEST(xml_in, status_antwort) {
 }
 
 TEST(xml_in, client_status_anfrage) {
-  ASSERT_NO_THROW(parse(client_status_anfrage_str));
-  auto const msg = parse(client_status_anfrage_str);
+  ASSERT_NO_THROW(parse_aus(client_status_anfrage_str));
+  auto const msg = parse_aus(client_status_anfrage_str);
   ASSERT_TRUE(holds_alternative<client_status_anfrage_msg>(msg));
   auto const client_status_anfrage_actual = get<client_status_anfrage_msg>(msg);
   EXPECT_EQ(client_status_anfrage_actual.sender_, "motis");
@@ -125,8 +125,8 @@ TEST(xml_in, client_status_anfrage) {
 }
 
 TEST(xml_in, client_status_antwort) {
-  ASSERT_NO_THROW(parse(client_status_antwort_str));
-  auto const msg = parse(client_status_antwort_str);
+  ASSERT_NO_THROW(parse_aus(client_status_antwort_str));
+  auto const msg = parse_aus(client_status_antwort_str);
   ASSERT_TRUE(holds_alternative<client_status_antwort_msg>(msg));
   auto const client_status_antwort_actual = get<client_status_antwort_msg>(msg);
   EXPECT_EQ(client_status_antwort_actual.t_, t);

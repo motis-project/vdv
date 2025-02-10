@@ -38,6 +38,7 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
             -Wno-duplicate-enum
             -Wno-ctad-maybe-unsupported
             -Wno-unknown-pragmas
+            -Wno-switch-default
             -Werror)
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
     set(vdv-compile-options -Wall -Wextra -Werror -Wno-unknown-pragmas)
@@ -61,18 +62,6 @@ target_include_directories(vdv PUBLIC include)
 target_link_libraries(vdv PUBLIC pugixml utl http-client date boost)
 target_compile_features(vdv PUBLIC cxx_std_23)
 target_compile_options(vdv PRIVATE ${vdv-compile-options})
-
-
-# --- CLIENT ---
-add_executable(vdv-client exe/client.cc)
-target_compile_features(vdv-client PUBLIC cxx_std_23)
-target_link_libraries(vdv-client vdv date boost-program_options web-server http-client)
-
-
-# --- SERVER ---
-add_executable(vdv-server exe/server.cc)
-target_compile_features(vdv-server PUBLIC cxx_std_23)
-target_link_libraries(vdv-server vdv boost-program_options web-server http-client)
 
 
 # --- TEST ---

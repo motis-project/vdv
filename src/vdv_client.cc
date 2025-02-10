@@ -47,7 +47,7 @@ void vdv_client::run(boost::asio::io_context& ioc) {
                      net::web_server::http_res_cb_t const& res_cb, bool) {
                    std::cout << "client status request:\n" << req << "\n\n";
                    try {
-                     auto const msg_in = parse(req.body());
+                     auto const msg_in = parse_aus(req.body());
                      if (holds_alternative<client_status_anfrage_msg>(msg_in)) {
                        auto const res_body = client_status_antwort_xml_str(
                            std::chrono::system_clock::now(), true, start_);
@@ -68,7 +68,7 @@ void vdv_client::run(boost::asio::io_context& ioc) {
                     net::web_server::http_res_cb_t const& res_cb, bool) {
                    std::cout << "data ready request:\n" << req << "\n\n";
                    try {
-                     auto const msg_in = parse(req.body());
+                     auto const msg_in = parse_aus(req.body());
                      if (holds_alternative<daten_bereit_anfrage_msg>(msg_in)) {
                        auto const res_body = daten_bereit_antwort_xml_str(
                            std::chrono::system_clock::now(), true, 0);
@@ -116,7 +116,7 @@ void vdv_client::subscribe(boost::asio::io_context& ioc,
         std::cout << "subscription response:\n" << r << "\n\n";
         if (r.status_code == 200) {
           try {
-            auto const msg_in = parse(r.body);
+            auto const msg_in = parse_aus(r.body);
             if (holds_alternative<abo_antwort_msg>(msg_in) &&
                 get<abo_antwort_msg>(msg_in).success_) {
               std::cout << "--> successfully subscribed\n\n";
@@ -140,7 +140,7 @@ void vdv_client::unsubscribe(boost::asio::io_context& ioc) {
         std::cout << "cancel sub response:\n" << r << "\n\n";
         if (r.status_code == 200) {
           try {
-            auto const msg_in = parse(r.body);
+            auto const msg_in = parse_aus(r.body);
             if (holds_alternative<abo_antwort_msg>(msg_in) &&
                 get<abo_antwort_msg>(msg_in).success_) {
               std::cout << "--> successfully unsubscribed\n\n";

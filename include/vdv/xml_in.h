@@ -1,11 +1,11 @@
 #pragma once
 
 #include "pugixml.hpp"
-#include "vdv/msg.h"
+#include "vdv/aus_msg.h"
 #include "vdv/types.h"
 
 namespace vdv {
 
-vdv_msg parse(std::string const&);
+aus_msg parse_aus(std::string const&);
 
 }  // namespace vdv

@@ -206,7 +206,7 @@ client_status_antwort_msg parse_client_status_antwort(
       .active_subs_ = get_subs()};
 }
 
-vdv_msg parse(std::string const& str) {
+aus_msg parse_aus(std::string const& str) {
   auto doc = pugi::xml_document{};
   auto result = doc.load_string(str.c_str());
 
@@ -215,7 +215,7 @@ vdv_msg parse(std::string const& str) {
 
   static auto const parse_fun_map =
       std::unordered_map<std::string,
-                         std::function<vdv_msg(pugi::xml_document const&)>>{
+                         std::function<aus_msg(pugi::xml_document const&)>>{
           {"AboAnfrage", parse_abo_anfrage},
           {"AboAntwort", parse_abo_antwort},
           {"DatenBereitAnfrage", parse_daten_bereit_anfrage},

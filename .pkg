@@ -5,19 +5,19 @@
 [utl]
   url=git@github.com:motis-project/utl.git
   branch=master
-  commit=b6f0f7a81675f420651ebed50a9c68b517ca79bc
+  commit=07fb33df7b79b73e84e0d2c69c6ee445221f6e32
 [date]
   url=git@github.com:motis-project/date.git
   branch=master
-  commit=646ba5e2e76636d9e65aaa3cf32e3e3a43defa2c
+  commit=ce88cc33b5551f66655614eeebb7c5b7189025fb
 [boost]
   url=git@github.com:motis-project/boost.git
   branch=master
-  commit=1c3f21c1fa8b149da89e2f6bcb48b28fff30fa5e
+  commit=930f38eb0365ceb7853273e03da4d9e7787abfb9
 [net]
   url=git@github.com:motis-project/net.git
   branch=master
-  commit=6b7d60453a2c06c3b0b3ca260edcd1dd607ff964
+  commit=6a457f5eaa077078fcac4153c5a178657737eee8
 [pugixml]
   url=git@github.com:motis-project/pugixml.git
   branch=master
